@@ -1,0 +1,24 @@
+{
+  "name": "spotify-lens",
+  "version": "1.0.0",
+  "description": "A nodejs cli to get aggregated Spotify data",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zhongyuan Jin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jzyxyz/SpotifyLens.git"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "mkdirp": "^0.5.1",
+    "spotify-web-api-node": "^4.0.0"
+  }
+}
