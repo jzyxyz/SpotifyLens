@@ -32,7 +32,7 @@ class SpotifyLens {
         errorHandler(error)('Failed to fetch data from Spotify')
       }
       const {
-        body: { items },
+        body: { items, total },
         body,
       } = data
       offset += items.length
@@ -52,6 +52,7 @@ class SpotifyLens {
       if (body.next === null) {
         hasMore = false
       }
+      console.log(`Fetched ${offset}/${total} of all tracks`)
     }
     console.log(`Fetched ${offset} tracks in total`)
   }

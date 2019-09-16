@@ -9,15 +9,17 @@ const inquirer = require('inquirer')
 class Worker {
   constructor() {
     this.loadEnv()
+    const REDIRECT_URL = `http://localhost:${process.env.Port}/callback/`
     this.spotifyApi = new SpotifyWebApi({
       clientId: process.env.ClientID,
       clientSecret: process.env.ClientSecret,
-      redirectUri: process.env.LogInCallback,
+      redirectUri: REDIRECT_URL,
     })
     this.app = express()
     this.app.use(cors()).use(cookieParser())
     // necessary
     this.authDoneCallback = this.authDoneCallback.bind(this)
+    this.authServerHook(this.authDoneCallback)
   }
 
   loadEnv() {
@@ -51,9 +53,8 @@ class Worker {
   }
 
   start() {
-    this.authServerHook(this.authDoneCallback)
-    this.server = this.app.listen(3000)
-    console.log('Getting access token on port 3000')
+    this.server = this.app.listen(process.env.Port)
+    console.log(`Getting access token on port ${process.env.Port}`)
     const state = 'ThisIsNotRandomAtAll'
     const scopes = [
       'user-read-private',
