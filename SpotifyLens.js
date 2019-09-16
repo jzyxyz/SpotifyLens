@@ -96,6 +96,26 @@ class SpotifyLens {
     }
     console.log(`Found ${finalList.length} artists in total.`)
   }
+
+  async addCurrent() {
+    let currentTrack
+    try {
+      currentTrack = await this.spotifyApi.getMyCurrentPlayingTrack()
+    } catch (error) {
+      errorHandler(error)('Failed to get data from Spotify')
+    }
+    const {
+      body: {
+        item: { id, name },
+      },
+    } = currentTrack
+    console.log(`Now playing ${name}`)
+    try {
+      await this.spotifyApi.addToMySavedTracks([id])
+    } catch (error) {
+      errorHandler(error)('Failed to add to the library')
+    }
+  }
 }
 
 module.exports = SpotifyLens

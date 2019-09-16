@@ -1,6 +1,6 @@
 {
   "name": "spotify-lens",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A nodejs cli to get aggregated Spotify data",
   "main": "index.js",
   "scripts": {

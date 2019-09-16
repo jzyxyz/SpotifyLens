@@ -58,10 +58,12 @@ class Worker {
     const state = 'ThisIsNotRandomAtAll'
     const scopes = [
       'user-read-private',
+      'user-library-modify',
       'user-read-email',
       'user-library-read',
       'playlist-read-private',
       'user-top-read',
+      'user-read-currently-playing',
     ]
     const authUrl = this.spotifyApi.createAuthorizeURL(scopes, state)
     console.log('Follow the url to authenticate. ')
@@ -77,10 +79,11 @@ class Worker {
           name: 'operations',
           message: 'What do you like me to do?',
           choices: [
+            '#0 Add current playing to my library',
+            new inquirer.Separator(),
             '#1 Export all tracks from my library.',
             '#2 Export an ordered & ranked artists list.',
-            new inquirer.Separator(),
-            '#3 All',
+            '#3 All above',
             new inquirer.Separator(),
             '#4 Exit',
           ],
@@ -95,6 +98,9 @@ class Worker {
       let choice = /(?<=#)\d{1}/.exec(op)[0]
       choice = parseInt(choice)
       switch (choice) {
+        case 0:
+          await this.lens.addCurrent()
+          break
         case 1:
           await this.lens.getAllTracks()
           break
