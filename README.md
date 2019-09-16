@@ -10,6 +10,14 @@ This is a CLI that helps to aggregate and export Spotify data to local `.json` f
 ## How to
 
 - Clone the repository
+- Create a `.env` file containing this field
+```
+ClientID=YOUR ID HERE
+ClientSecret=YOUR SECRET HERE
+LogInCallback=http://localhost:3000/callback/
+OutputDir=data 
+```
+    As for how to get secret and id, refer to the docs by Spotify.
 - `npm install`
 - `npm start`
 - Follow the instrcutions on the terminal
