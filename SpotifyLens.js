@@ -116,6 +116,14 @@ class SpotifyLens {
       errorHandler(error)('Failed to add to the library')
     }
   }
+
+  async nextTrack() {
+    try {
+      await this.spotifyApi.skipToNext()
+    } catch (error) {
+      errorHandler(error)('Failed to do so....')
+    }
+  }
 }
 
 module.exports = SpotifyLens

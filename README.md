@@ -4,6 +4,8 @@ This is a CLI that helps to aggregate and export Spotify data to local `.json` f
 
 ## Features
 
+- Commandline shortcuts to add current track to the library.
+- Commandline shortcuts to next track.
 - Get all tracks in the *Liked Songs* library.
 - Get a list of unique & ranked artists based on the tracks from *Liked Songs*.
 

@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser')
 const SpotifyLens = require('./SpotifyLens')
 const { errorHandler } = require('./utils')
 const inquirer = require('inquirer')
+const open = require('open')
 
 class Worker {
   constructor() {
@@ -52,7 +53,7 @@ class Worker {
     })
   }
 
-  start() {
+  async start() {
     this.server = this.app.listen(process.env.Port)
     console.log(`Getting access token on port ${process.env.Port}`)
     const state = 'ThisIsNotRandomAtAll'
@@ -64,10 +65,12 @@ class Worker {
       'playlist-read-private',
       'user-top-read',
       'user-read-currently-playing',
+      'user-modify-playback-state',
     ]
     const authUrl = this.spotifyApi.createAuthorizeURL(scopes, state)
-    console.log('Follow the url to authenticate. ')
+    // console.log('Follow the url to authenticate. ')
     console.log(authUrl)
+    await open(authUrl)
   }
 
   async authDoneCallback() {
@@ -79,13 +82,15 @@ class Worker {
           name: 'operations',
           message: 'What do you like me to do?',
           choices: [
+            new inquirer.Separator(),
             '#0 Add current playing to my library',
+            '#1 Skip to next track',
             new inquirer.Separator(),
-            '#1 Export all tracks from my library.',
-            '#2 Export an ordered & ranked artists list.',
-            '#3 All above',
+            '#2 Export all tracks from my library.',
+            '#3 Export an ordered & ranked artists list.',
+            '#4 All above',
             new inquirer.Separator(),
-            '#4 Exit',
+            '#5 Exit',
           ],
         },
       ])
@@ -102,12 +107,15 @@ class Worker {
           await this.lens.addCurrent()
           break
         case 1:
-          await this.lens.getAllTracks()
+          await this.lens.nextTrack()
           break
         case 2:
-          await this.lens.getFavArtists()
+          await this.lens.getAllTracks()
           break
         case 3:
+          await this.lens.getFavArtists()
+          break
+        case 4:
           await this.lens.getAllTracks()
           await this.lens.getFavArtists()
           break
