@@ -29,3 +29,20 @@ OutputDir=data
 - Customize keys to export on objects.
 - Genre data.
 - Top artists/tracks.
+
+## API
+
+### Worker
+
+- The `Worker` class provides authentication flow and cli-interface.
+
+### SpotifyLens
+- The `SpotifyLens` class provides core functions. This class depends on `lodash`, `spotify-web-api-node`, and `mikdirp`. To construct a `SpotifyLens` instance, pass a **authenticated** `SpotifyWebApiNode` instance.
+  ```javascript
+  const lens = new SpotifyLens(spotifyApi)
+  ```
+#### Available methods
+- `getFavArtists` exports a ordered & unique artists list whose works are found in the *Saved Songs* library.
+- `addCurrent` add the currently being played music to the *Saved Songs` library.
+- `getAllTracks` exports all tracks found in the *Saved Songs* library.
+- `nextTrack` let the playback skip the current track to the next one. 
