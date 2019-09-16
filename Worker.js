@@ -81,6 +81,7 @@ class Worker {
             '#2 Export an ordered & ranked artists list.',
             new inquirer.Separator(),
             '#3 All',
+            new inquirer.Separator(),
             '#4 Exit',
           ],
         },
