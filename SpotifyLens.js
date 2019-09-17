@@ -7,6 +7,7 @@ const {
   pruneTrack,
   errorHandler,
   writeToFile,
+  prunePlaylist,
 } = require('./utils')
 const { promisify } = require('util')
 let mkdirp = require('mkdirp')
@@ -26,16 +27,22 @@ class SpotifyLens {
   async getAllTracks(playlistId) {
     const limit = 50
 
-    let data = {}
-    data = await this.spotifyApi.getMySavedTracks({ offset: 0, limit })
+    const getter = playlistId => options => {
+      if (playlistId) {
+        return this.spotifyApi.getPlaylistTracks(playlistId, options)
+      } else {
+        return this.spotifyApi.getMySavedTracks(options)
+      }
+    }
+    let data = await getter(playlistId)({ offset: 0, limit })
     const {
       body: { total },
     } = data
-
     console.log(`Total: ${total} tracks found`)
+
     const batch = Math.ceil(total / limit)
     const requests = _.range(0, batch).map(i =>
-      this.spotifyApi.getMySavedTracks({
+      getter(playlistId)({
         offset: i * limit,
         limit,
       }),
@@ -68,9 +75,9 @@ class SpotifyLens {
     const responses = await allSettled(requests)
     const rejected = []
 
-    const results = responses.map(responseHandler)
+    //TO DO: fix rejected requests
 
-    const tasks = results.map(async (el, idx) => {
+    const tasks = responses.map(responseHandler).map(async (el, idx) => {
       if (typeof el === 'number') {
         rejected.push(el)
       } else {
@@ -90,8 +97,6 @@ class SpotifyLens {
     let files = await fs.promises.readdir(
       path.join(this.outputDir, ALL_SAVED_TRACKS),
     )
-    console.log(files)
-
     const processor = async uri => {
       const trackList = await readJsonFromFile(
         path.join(this.outputDir, ALL_SAVED_TRACKS, uri),
@@ -113,16 +118,11 @@ class SpotifyLens {
     const finalDict = flat.reduce(distinctReduceBy('id'), {})
     const finalList = _.flatMap(Object.values(finalDict))
     const ordered = _.orderBy(finalList, ['count', 'name'], ['desc', 'asc'])
-    const p = path.join(this.outputDir, ARTISTS)
-    try {
-      await mkdirp(p)
-      await fs.promises.writeFile(
-        path.join(p, 'fav_artists.json'),
-        JSON.stringify(ordered),
-      )
-    } catch (error) {
-      errorHandler(error)('Failed to write to file')
-    }
+    await writeToFile(
+      path.join(this.outputDir, ARTISTS),
+      `fav_artists.json`,
+      JSON.stringify(ordered),
+    )
     console.log(`Found ${finalList.length} artists in total.`)
   }
 
@@ -152,6 +152,23 @@ class SpotifyLens {
     } catch (error) {
       errorHandler(error)('Failed to do so....')
     }
+  }
+
+  async showPlaylists() {
+    let data
+    try {
+      data = await this.spotifyApi.getUserPlaylists()
+    } catch (error) {
+      errorHandler(error)('Failed to do so....')
+    }
+    const {
+      body: { items },
+    } = data
+    items.forEach(el => {
+      prunePlaylist(el)
+      const { name, id } = el
+      console.log(`${name} : ${id}`)
+    })
   }
 }
 

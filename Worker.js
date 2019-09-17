@@ -88,9 +88,10 @@ class Worker {
             new inquirer.Separator(),
             '#2 Export all tracks from my library.',
             '#3 Export an ordered & ranked artists list.',
-            '#4 All above',
+            '#4 List all playlists with its id',
+            '#5 All above',
             new inquirer.Separator(),
-            '#5 Exit',
+            '#6 Exit',
           ],
         },
       ])
@@ -116,6 +117,9 @@ class Worker {
           await this.lens.getFavArtists()
           break
         case 4:
+          await this.lens.showPlaylists()
+          break
+        case 5:
           await this.lens.getAllTracks()
           await this.lens.getFavArtists()
           break
