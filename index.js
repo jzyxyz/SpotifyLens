@@ -1,10 +1,7 @@
-const Worker = require('./Worker')
-const SpotifyLens = require('./SpotifyLens')
+const Worker = require('./src/Worker')
+const SpotifyLens = require('./src/SpotifyLens')
 
 module.exports = {
   Worker,
   SpotifyLens,
 }
-
-// const w = new Worker()
-// w.start()

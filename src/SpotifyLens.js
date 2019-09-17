@@ -108,6 +108,7 @@ class SpotifyLens {
   }
 
   async nextTrack() {
+    console.log(process.cwd())
     try {
       await this.spotifyApi.skipToNext()
     } catch (error) {

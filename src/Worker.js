@@ -23,7 +23,7 @@ class Worker {
     // necessary
     this.authDoneCallback = this.authDoneCallback.bind(this)
     this.authServerHook(this.authDoneCallback)
-    this.outputDir = path.join(__dirname, process.env.OutputDir)
+    this.outputDir = path.join(process.cwd(), process.env.OutputDir)
   }
 
   loadEnv() {
