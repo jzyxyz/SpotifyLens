@@ -1,12 +1,8 @@
-const fs = require('fs')
-const path = require('path')
 const _ = require('lodash')
 const {
   distinctReduceBy,
-  readJsonFromFile,
   pruneTrack,
   errorHandler,
-  writeToFile,
   prunePlaylist,
 } = require('./utils')
 const { promisify } = require('util')
@@ -14,14 +10,10 @@ let mkdirp = require('mkdirp')
 mkdirp = promisify(mkdirp)
 const allSettled = require('promise.allsettled')
 
-const ALL_SAVED_TRACKS = `all_saved_tracks`
-const ARTISTS = 'artists'
-
 class SpotifyLens {
   constructor(spotifyApi, options) {
     this.spotifyApi = spotifyApi
     this.options = options
-    this.outputDir = path.join(__dirname, process.env.OutputDir)
   }
 
   async getAllTracks(playlistId) {
@@ -48,6 +40,18 @@ class SpotifyLens {
       }),
     )
 
+    // const dataReducer = (acc, cur, idx) => {
+    //   if (typeof cur === 'number') {
+    //     rejected.push(cur)
+    //   } else {
+    //     return acc.concat(cur)
+    //   }
+    // }
+
+    const responses = await allSettled(requests)
+    //TO DO: fix rejected requests
+    const rejected = []
+
     const responseHandler = (r, idx) => {
       if (r.status === 'fulfilled') {
         const {
@@ -60,70 +64,27 @@ class SpotifyLens {
         })
         return items
       } else {
-        return idx
+        rejected.push(idx)
+        return null
       }
     }
 
-    // const dataReducer = (acc, cur, idx) => {
-    //   if (typeof cur === 'number') {
-    //     rejected.push(cur)
-    //   } else {
-    //     return acc.concat(cur)
-    //   }
-    // }
-
-    const responses = await allSettled(requests)
-    const rejected = []
-
-    //TO DO: fix rejected requests
-
-    const tasks = responses.map(responseHandler).map(async (el, idx) => {
-      if (typeof el === 'number') {
-        rejected.push(el)
-      } else {
-        await writeToFile(
-          path.join(this.outputDir, ALL_SAVED_TRACKS),
-          `tracks_${idx * limit}.json`,
-          JSON.stringify(el),
-        )
-      }
-    })
-
-    await Promise.all(tasks)
     console.log(`Failed requests: ${rejected.length}`)
+    return _.compact(responses.map(responseHandler))
   }
 
   async getFavArtists() {
-    let files = await fs.promises.readdir(
-      path.join(this.outputDir, ALL_SAVED_TRACKS),
-    )
-    const processor = async uri => {
-      const trackList = await readJsonFromFile(
-        path.join(this.outputDir, ALL_SAVED_TRACKS, uri),
-      )
-      const artistsDict = _.flatMap(trackList, el => {
-        el.track.artists.forEach(el => {
-          el.count = 1
-        })
-        return el.track.artists
-      }).reduce(distinctReduceBy('id'), {})
-
-      const artistsList = _.flatMap(Object.values(artistsDict))
-      return artistsList
-    }
-
-    const todo = _.flatMap(files, processor)
-    let allLists = await Promise.all(todo)
-    const flat = _.flatMap(allLists)
-    const finalDict = flat.reduce(distinctReduceBy('id'), {})
-    const finalList = _.flatMap(Object.values(finalDict))
+    let trackList = await this.getAllTracks()
+    trackList = _.flatten(trackList)
+    const dict = _.flatMap(trackList, el => {
+      el.track.artists.forEach(el => {
+        el.count = 1
+      })
+      return el.track.artists
+    }).reduce(distinctReduceBy('id'), {})
+    const finalList = _.flatMap(Object.values(dict))
     const ordered = _.orderBy(finalList, ['count', 'name'], ['desc', 'asc'])
-    await writeToFile(
-      path.join(this.outputDir, ARTISTS),
-      `fav_artists.json`,
-      JSON.stringify(ordered),
-    )
-    console.log(`Found ${finalList.length} artists in total.`)
+    return ordered
   }
 
   async addCurrent() {

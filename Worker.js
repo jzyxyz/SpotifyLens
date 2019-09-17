@@ -3,9 +3,11 @@ const cors = require('cors')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const SpotifyLens = require('./SpotifyLens')
-const { errorHandler } = require('./utils')
+const { errorHandler, writeToFile } = require('./utils')
 const inquirer = require('inquirer')
 const open = require('open')
+const { SPOTIFY_SCOPES: scopes, PROMPT: prompt } = require('./config')
+const path = require('path')
 
 class Worker {
   constructor() {
@@ -21,6 +23,7 @@ class Worker {
     // necessary
     this.authDoneCallback = this.authDoneCallback.bind(this)
     this.authServerHook(this.authDoneCallback)
+    this.outputDir = path.join(__dirname, process.env.OutputDir)
   }
 
   loadEnv() {
@@ -55,49 +58,20 @@ class Worker {
 
   async start() {
     this.server = this.app.listen(process.env.Port)
-    console.log(`Getting access token on port ${process.env.Port}`)
+    // console.log(`Getting access token on port ${process.env.Port}`)
     const state = 'ThisIsNotRandomAtAll'
-    const scopes = [
-      'user-read-private',
-      'user-library-modify',
-      'user-read-email',
-      'user-library-read',
-      'playlist-read-private',
-      'user-top-read',
-      'user-read-currently-playing',
-      'user-modify-playback-state',
-    ]
     const authUrl = this.spotifyApi.createAuthorizeURL(scopes, state)
-    // console.log('Follow the url to authenticate. ')
-    console.log(authUrl)
+    // console.log(authUrl)
     await open(authUrl)
   }
 
   async authDoneCallback() {
+    this.server.close()
     this.lens = new SpotifyLens(this.spotifyApi)
     const readInput = async () => {
-      const { operations: op } = await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'operations',
-          message: 'What do you like me to do?',
-          choices: [
-            new inquirer.Separator(),
-            '#0 Add current playing to my library',
-            '#1 Skip to next track',
-            new inquirer.Separator(),
-            '#2 Export all tracks from my library.',
-            '#3 Export an ordered & ranked artists list.',
-            '#4 List all playlists with its id',
-            '#5 All above',
-            new inquirer.Separator(),
-            '#6 Exit',
-          ],
-        },
-      ])
+      const { operations: op } = await inquirer.prompt([prompt])
       return op
     }
-
     let loop = true
     while (loop) {
       const op = await readInput()
@@ -111,25 +85,36 @@ class Worker {
           await this.lens.nextTrack()
           break
         case 2:
-          await this.lens.getAllTracks()
+          const playlistId = undefined
+          const pagedTracks = await this.lens.getAllTracks()
+          const tasks = pagedTracks.map(async (el, idx) => {
+            const filename = playlistId =>
+              `${playlistId ? playlistId : 'tracks'}_${idx}.json`
+            await writeToFile(
+              path.join(this.outputDir, process.env.All_Saved_Tracks),
+              filename(playlistId),
+              JSON.stringify(el),
+            )
+          })
+          await Promise.all(tasks)
           break
         case 3:
-          await this.lens.getFavArtists()
+          const list = await this.lens.getFavArtists()
+          await writeToFile(
+            path.join(this.outputDir, process.env.Artists),
+            `fav_artists.json`,
+            JSON.stringify(list),
+          )
+          console.log(`Found ${list.length} artists in total.`)
           break
         case 4:
           await this.lens.showPlaylists()
           break
-        case 5:
-          await this.lens.getAllTracks()
-          await this.lens.getFavArtists()
-          break
         default:
           loop = false
-          break
       }
       console.log('Done! ')
     }
-    this.server.close()
     process.exit(0)
   }
 }
