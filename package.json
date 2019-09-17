@@ -4,7 +4,7 @@
   "description": "A nodejs cli to get aggregated Spotify data",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node run.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Zhongyuan Jin",

@@ -6,5 +6,5 @@ module.exports = {
   SpotifyLens,
 }
 
-const w = new Worker()
-w.start()
+// const w = new Worker()
+// w.start()

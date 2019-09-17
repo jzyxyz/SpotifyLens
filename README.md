@@ -38,9 +38,16 @@ Artists=OUTPUT DIR OF ARTISTS
 
 ## API
 
+
 ### Worker
 
 The `Worker` class provides authentication flow and cli.
+```javascript
+const { Worker } = require('spotify-lens')
+
+const w = new Worker()
+w.start()
+```
 
 ### SpotifyLens
 
@@ -48,6 +55,8 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 
 
   ```javascript
+  const {SpotifyLens} = require('spotify-lens')
+  // authen with worker/spotify-web-api-node
   const lens = new SpotifyLens(spotifyApi)
   ```
 #### Available methods
