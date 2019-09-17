@@ -85,11 +85,12 @@ class Worker {
           await this.lens.nextTrack()
           break
         case 2:
+          // const playlistId = '4ADFwns89Zo5O3ea13wFG3'
           const playlistId = undefined
           const pagedTracks = await this.lens.getAllTracks()
           const tasks = pagedTracks.map(async (el, idx) => {
             const filename = playlistId =>
-              `${playlistId ? playlistId : 'tracks'}_${idx}.json`
+              `${playlistId ? playlistId.slice(0, 7) : 'tracks'}_${idx}.json`
             await writeToFile(
               path.join(this.outputDir, process.env.All_Saved_Tracks),
               filename(playlistId),
