@@ -51,10 +51,12 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
   const lens = new SpotifyLens(spotifyApi)
   ```
 #### Available methods
-- `getFavArtists(playlistId)` exports a ordered & unique artists list whose works are found in the *Saved Songs* library.
+- `getFavArtists(playlistId)` exports a ordered & unique artists list whose works are found in the playlist with `playlistId`.
+If `playlistId` is `undefined`, it will target at the *Saved Songs* library.
 - `addCurrent` adds the currently being played music to the *Saved Songs* library.
-- `getAllTracks(playlistId)` exports all tracks found in the *Saved Songs* library.
+- `getAllTracks(playlistId)` exports all tracks found in the playlist with `playlistId`.
 - `nextTrack` lets the playback skip the current track to the next one. 
+- `showPlaylists` shows all playlists and the corresponding id.
 - `//TODO`
 
 ## Roadmap
