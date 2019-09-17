@@ -1,4 +1,8 @@
 const fs = require('fs')
+const { promisify } = require('util')
+let mkdirp = require('mkdirp')
+const path = require('path')
+mkdirp = promisify(mkdirp)
 
 const prunePlaylist = obj => {
   const pruneProps = [
@@ -63,10 +67,20 @@ const errorHandler = error => msg => {
   throw new Error(error)
 }
 
+const writeToFile = async (dir, filename, string) => {
+  try {
+    await mkdirp(dir)
+    await fs.promises.writeFile(path.join(dir, filename), string)
+  } catch (error) {
+    errorHandler(error)('Failed to write to file')
+  }
+}
+
 module.exports = {
   prunePlaylist,
   errorHandler,
   pruneTrack,
   distinctReduceBy,
   readJsonFromFile,
+  writeToFile,
 }

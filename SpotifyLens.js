@@ -6,10 +6,12 @@ const {
   readJsonFromFile,
   pruneTrack,
   errorHandler,
+  writeToFile,
 } = require('./utils')
 const { promisify } = require('util')
 let mkdirp = require('mkdirp')
 mkdirp = promisify(mkdirp)
+const allSettled = require('promise.allsettled')
 
 const ALL_SAVED_TRACKS = `all_saved_tracks`
 const ARTISTS = 'artists'
@@ -20,41 +22,68 @@ class SpotifyLens {
     this.options = options
     this.outputDir = path.join(__dirname, process.env.OutputDir)
   }
-  async getAllTracks() {
-    let hasMore = true
-    let offset = 0
-    let limit = 50
+
+  async getAllTracks(playlistId) {
+    const limit = 50
+
     let data = {}
-    while (hasMore) {
-      try {
-        data = await this.spotifyApi.getMySavedTracks({ offset, limit })
-      } catch (error) {
-        errorHandler(error)('Failed to fetch data from Spotify')
+    data = await this.spotifyApi.getMySavedTracks({ offset: 0, limit })
+    const {
+      body: { total },
+    } = data
+
+    console.log(`Total: ${total} tracks found`)
+    const batch = Math.ceil(total / limit)
+    const requests = _.range(0, batch).map(i =>
+      this.spotifyApi.getMySavedTracks({
+        offset: i * limit,
+        limit,
+      }),
+    )
+
+    const responseHandler = (r, idx) => {
+      if (r.status === 'fulfilled') {
+        const {
+          value: {
+            body: { items },
+          },
+        } = r
+        items.forEach(item => {
+          pruneTrack(item.track)
+        })
+        return items
+      } else {
+        return idx
       }
-      const {
-        body: { items, total },
-        body,
-      } = data
-      offset += items.length
-      items.forEach(item => {
-        pruneTrack(item.track)
-      })
-      const p = path.join(this.outputDir, ALL_SAVED_TRACKS)
-      try {
-        await mkdirp(p)
-        await fs.promises.writeFile(
-          path.join(p, `track_${offset}.json`),
-          JSON.stringify(items),
-        )
-      } catch (error) {
-        errorHandler(error)('Failed to write to file')
-      }
-      if (body.next === null) {
-        hasMore = false
-      }
-      console.log(`Fetched ${offset}/${total} of all tracks`)
     }
-    console.log(`Fetched ${offset} tracks in total`)
+
+    // const dataReducer = (acc, cur, idx) => {
+    //   if (typeof cur === 'number') {
+    //     rejected.push(cur)
+    //   } else {
+    //     return acc.concat(cur)
+    //   }
+    // }
+
+    const responses = await allSettled(requests)
+    const rejected = []
+
+    const results = responses.map(responseHandler)
+
+    const tasks = results.map(async (el, idx) => {
+      if (typeof el === 'number') {
+        rejected.push(el)
+      } else {
+        await writeToFile(
+          path.join(this.outputDir, ALL_SAVED_TRACKS),
+          `tracks_${idx * limit}.json`,
+          JSON.stringify(el),
+        )
+      }
+    })
+
+    await Promise.all(tasks)
+    console.log(`Failed requests: ${rejected.length}`)
   }
 
   async getFavArtists() {
