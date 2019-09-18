@@ -35,7 +35,36 @@ const PROMPT = {
   }),
 }
 
+const PRUNE_PLAYLIST_KEYS = [
+  'external_urls',
+  'collaborative',
+  'owner',
+  'public',
+  'snapshot_id',
+]
+
+const PRUNE_TRACK_KEYS = [
+  'album',
+  'available_markets',
+  'disc_number',
+  'duration_ms',
+  'explicit',
+  'external_ids',
+  'external_urls',
+  'owner',
+  'public',
+  'is_playable',
+  'linked_from',
+  'restrictions',
+  'popularity',
+  'preview_url',
+  'track_number',
+  'is_local',
+]
+
 module.exports = {
   SPOTIFY_SCOPES,
   PROMPT,
+  PRUNE_PLAYLIST_KEYS,
+  PRUNE_TRACK_KEYS,
 }

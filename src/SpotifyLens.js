@@ -5,9 +5,6 @@ const {
   errorHandler,
   prunePlaylist,
 } = require('./utils')
-const { promisify } = require('util')
-let mkdirp = require('mkdirp')
-mkdirp = promisify(mkdirp)
 const allSettled = require('promise.allsettled')
 
 class SpotifyLens {
@@ -73,8 +70,8 @@ class SpotifyLens {
     return _.compact(responses.map(responseHandler))
   }
 
-  async getFavArtists() {
-    let trackList = await this.getAllTracks()
+  async getFavArtists(playlistId) {
+    let trackList = await this.getAllTracks(playlistId)
     trackList = _.flatten(trackList)
     const dict = _.flatMap(trackList, el => {
       el.track.artists.forEach(el => {

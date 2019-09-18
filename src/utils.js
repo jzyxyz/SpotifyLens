@@ -3,41 +3,11 @@ const { promisify } = require('util')
 let mkdirp = require('mkdirp')
 const path = require('path')
 mkdirp = promisify(mkdirp)
+const { PRUNE_PLAYLIST_KEYS, PRUNE_TRACK_KEYS } = require('../config')
 
-const prunePlaylist = obj => {
-  const pruneProps = [
-    'external_urls',
-    'collaborative',
-    'owner',
-    'public',
-    'snapshot_id',
-  ]
-  pruneProps.forEach(prop => {
-    delete obj[prop]
-  })
-}
-
-const pruneTrack = obj => {
-  const pruneProps = [
-    'album',
-    'available_markets',
-    'disc_number',
-    'duration_ms',
-    'explicit',
-    'external_ids',
-    'external_urls',
-    'owner',
-    'public',
-    'is_playable',
-    'linked_from',
-    'restrictions',
-    'popularity',
-    'preview_url',
-    'track_number',
-    'is_local',
-  ]
-  pruneProps.forEach(prop => {
-    delete obj[prop]
+const prune = pruneKeys => obj => {
+  pruneKeys.forEach(key => {
+    delete obj[key]
   })
 }
 
@@ -76,10 +46,13 @@ const writeToFile = async (dir, filename, string) => {
   }
 }
 
+const pruneTrack = prune(PRUNE_TRACK_KEYS)
+const prunePlaylist = prune(PRUNE_PLAYLIST_KEYS)
+
 module.exports = {
   prunePlaylist,
-  errorHandler,
   pruneTrack,
+  errorHandler,
   distinctReduceBy,
   readJsonFromFile,
   writeToFile,

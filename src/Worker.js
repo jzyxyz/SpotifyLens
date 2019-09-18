@@ -6,7 +6,7 @@ const SpotifyLens = require('./SpotifyLens')
 const { errorHandler, writeToFile } = require('./utils')
 const inquirer = require('inquirer')
 const open = require('open')
-const { SPOTIFY_SCOPES: scopes, PROMPT: prompt } = require('./config')
+const { SPOTIFY_SCOPES: scopes, PROMPT: prompt } = require('../config')
 const path = require('path')
 
 class Worker {
