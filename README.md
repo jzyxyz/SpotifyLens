@@ -64,10 +64,10 @@ const lens = new SpotifyLens(spotifyApi)
 
 #### Available methods
 
+- `getAllTracks(playlistId)` exports all tracks found in the playlist with `playlistId`.
 - `getFavArtists(playlistId)` exports a ordered & unique artists list whose works are found in the playlist with `playlistId`.
   If `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
-- `addCurrent` adds the currently being played music to the _Saved Songs_ library.
-- `getAllTracks(playlistId)` exports all tracks found in the playlist with `playlistId`.
+- `addCurrent` adds the currently being played track to the _Saved Songs_ library.
 - `nextTrack` lets the playback skip the current track to the next one.
 - `showPlaylists` shows all playlists and the corresponding id.
 - `//TODO`
@@ -84,6 +84,6 @@ The same logic applies to `PRUNE_TRACK_KEYS`.
 
 ## Roadmap
 
-[x] Customize keys to export on objects.
-[ ] Genre data.
-[ ] Top artists/tracks.
+- [x] Customize keys to export on objects.
+- [ ] Genre data.
+- [ ] Top artists/tracks.
