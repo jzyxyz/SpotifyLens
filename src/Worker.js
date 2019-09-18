@@ -22,6 +22,12 @@ class Worker {
     this.app.use(cors()).use(cookieParser())
     // necessary
     this.authDoneCallback = this.authDoneCallback.bind(this)
+    this.spotifyApi.refreshAccessToken = this.spotifyApi.refreshAccessToken.bind(
+      this.spotifyApi,
+    )
+    this.spotifyApi.setAccessToken = this.spotifyApi.setAccessToken.bind(
+      this.spotifyApi,
+    )
     this.authServerHook(this.authDoneCallback)
     this.outputDir = path.join(process.cwd(), process.env.OutputDir)
   }
@@ -72,6 +78,18 @@ class Worker {
       const { operations: op } = await inquirer.prompt([prompt])
       return op
     }
+
+    this.refreshIntervalId = setInterval(async () => {
+      try {
+        const {
+          body: { access_token },
+        } = await this.spotifyApi.refreshAccessToken()
+        this.spotifyApi.setAccessToken(access_token)
+      } catch (error) {
+        errorHandler(error)('Failed to refresh access token')
+      }
+    }, 3000000)
+
     let loop = true
     while (loop) {
       const op = await readInput()
@@ -135,6 +153,7 @@ class Worker {
       }
       console.log('Done! ')
     }
+    clearInterval(this.refreshIntervalId)
     process.exit(0)
   }
 }

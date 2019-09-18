@@ -1,5 +1,9 @@
 # SpotifyLens
 
+## NB
+Recently the package will be updated quite often, i.e. many api changes may occur. Please always use the latest version.
+
+
 This is a **enhanced** wrapper for Spotify-api. It provides a simple api to the data otherwise have to be computed.
 e.g.
 
@@ -16,16 +20,17 @@ such as:
 
 ## Features
 
-- Cli control over spotify.
-- Get all tracks in **ANY** playlists.
-- Get a list of unique & ranked artists based on the tracks from **ANY** playlist.
+- Interactive cli for controling over spotify and export data at the terminal.
+- Automatically refreshing access token in the interactive mode.
+- Get **contactnated** & **pruned** data of all tracks in **ANY** playlists. Speed garanteed by concurrent requests.
+- Get a list of **unique** & **ranked** artists based on the tracks from **ANY** playlist.
 
 ## How to
 
-- Clone the repository
+1. Run interactively at the terminal
+
 - Create a `.env` file containing these fields.  
   As for how to get secret and id, refer to the docs by Spotify.
-
 ```
 ClientID=YOUR ID HERE
 ClientSecret=YOUR SECRET HERE
@@ -33,34 +38,34 @@ Port=3000
 OutputDir=data
 All_Saved_Tracks=OUTPUT DIR OF TRACKS
 Artists=OUTPUT DIR OF ARTISTS
-```
+```  
+- Clone the repository then `npm install`  *OR* `npm i spotify-lens`.
+- `node run.js` and follow the instrcutions on the terminal. 
 
-- `npm install` && `node run.js`.
-- _Or_ `npm i spotify-lens`.
-- Follow the instrcutions on the terminal.
-
-## API
-
-### Worker
-
-The `Worker` class provides authentication flow and cli.
-
-```javascript
-const { Worker } = require('spotify-lens')
-
-const w = new Worker()
-w.start()
-```
-
-### SpotifyLens
-
-The `SpotifyLens` class provides core functions, and is well-suited to be embeded into exsiting web services. It depends on `lodash`, `spotify-web-api-node`. To construct a `SpotifyLens` instance, pass a **authenticated** `SpotifyWebApiNode` instance.
+2. Exploit api
+   
+- `npm i spotify-lens` 
+- Manage the authentication yourself and pass a **authenticated** `SpotifyWebApiNode` instance to the `SpotifyLens` constructor.
 
 ```javascript
 const { SpotifyLens } = require('spotify-lens')
 // authenticate with worker/spotify-web-api-node
 const lens = new SpotifyLens(spotifyApi)
+//...
+const artistsList = await lens.getFavArtists()
+//...
+
 ```
+
+## API
+
+### Worker
+
+The `Worker` class provides authentication flow and cli, refer to the `Worker.js` in the `src` folder.
+
+### SpotifyLens
+
+The `SpotifyLens` class provides core functions, and is well-suited to be embeded into exsiting web services. It depends on `lodash`, `spotify-web-api-node`. 
 
 #### Available methods
 
@@ -113,5 +118,6 @@ In the `config.js`, you can configure some beheavior of the api.
 ## Roadmap
 
 - [x] Customize keys to export on objects.
+- [x] Top artists/tracks.
 - [ ] Genre data.
-- [ ] Top artists/tracks.
+- [ ] Non-blocking object prune to improve performance.
