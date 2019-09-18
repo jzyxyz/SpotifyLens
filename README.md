@@ -29,33 +29,33 @@ such as:
 
 1. Run interactively at the terminal
 
-- Create a `.env` file containing these fields.  
-  As for how to get secret and id, refer to the docs by Spotify.
-```
-ClientID=YOUR ID HERE
-ClientSecret=YOUR SECRET HERE
-Port=3000
-OutputDir=data
-All_Saved_Tracks=OUTPUT DIR OF TRACKS
-Artists=OUTPUT DIR OF ARTISTS
-```  
-- Clone the repository then `npm install`  *OR* `npm i spotify-lens`.
-- `node run.js` and follow the instrcutions on the terminal. 
+  - Create a `.env` file containing these fields.  
+    As for how to get secret and id, refer to the docs by Spotify.
+  ```
+  ClientID=YOUR ID HERE
+  ClientSecret=YOUR SECRET HERE
+  Port=3000
+  OutputDir=data
+  All_Saved_Tracks=OUTPUT DIR OF TRACKS
+  Artists=OUTPUT DIR OF ARTISTS
+  ```  
+  - Clone the repository then `npm install`  *OR* `npm i spotify-lens`.
+  - `node run.js` and follow the instrcutions on the terminal. 
 
 2. Exploit api
    
-- `npm i spotify-lens` 
-- Manage the authentication yourself and pass a **authenticated** `SpotifyWebApiNode` instance to the `SpotifyLens` constructor.
+  - `npm i spotify-lens` 
+  - Manage the authentication yourself and pass a **authenticated** `SpotifyWebApiNode` instance to the `SpotifyLens` constructor.
 
-```javascript
-const { SpotifyLens } = require('spotify-lens')
-// authenticate with worker/spotify-web-api-node
-const lens = new SpotifyLens(spotifyApi)
-//...
-const artistsList = await lens.getFavArtists()
-//...
+  ```javascript
+  const { SpotifyLens } = require('spotify-lens')
+  // authenticate with worker/spotify-web-api-node
+  const lens = new SpotifyLens(spotifyApi)
+  //...
+  const artistsList = await lens.getFavArtists()
+  //...
 
-```
+  ```
 
 ## API
 
