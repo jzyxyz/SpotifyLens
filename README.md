@@ -23,7 +23,7 @@ such as:
 ## How to
 
 - Clone the repository
-- Create a `.env` file containing this field.  
+- Create a `.env` file containing these fields.  
   As for how to get secret and id, refer to the docs by Spotify.
 
 ```
@@ -35,7 +35,7 @@ All_Saved_Tracks=OUTPUT DIR OF TRACKS
 Artists=OUTPUT DIR OF ARTISTS
 ```
 
-- `npm install` && `node index.js`.
+- `npm install` && `node run.js`.
 - _Or_ `npm i spotify-lens`.
 - Follow the instrcutions on the terminal.
 
