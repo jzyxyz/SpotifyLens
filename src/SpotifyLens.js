@@ -123,24 +123,28 @@ class SpotifyLens {
     const {
       body: { items },
     } = data
-    items.forEach(el => {
-      prunePlaylist(el)
+    // items.forEach(el => {
+    //   prunePlaylist(el)
+    //   const { name, id } = el
+    //   console.log()
+    // })
+    return items.map(el => {
       const { name, id } = el
-      console.log(`${name} : ${id}`)
+      return `${name} : ${id}`
     })
   }
 
-  async getTopArtists({ time_range, limit, offset }) {
+  async getTopHandler(getter, { time_range, limit, offset }, pruneFn) {
+    const TIME_RANGES = ['long_term', 'medium_term', 'short_term']
     if (time_range) {
-      return await this.spotifyApi.getMyTopArtists({
+      return await getter({
         time_range,
         limit: limit || 50,
         offset: offset || 0,
       })
     } else {
-      const TIME_RANGES = ['long_term', 'medium_term', 'short_term']
       const requests = TIME_RANGES.map(tr =>
-        this.spotifyApi.getMyTopArtists({
+        getter({
           time_range: tr,
           limit: limit || 50,
           offset: offset || 0,
@@ -148,8 +152,23 @@ class SpotifyLens {
       )
       const responses = await Promise.all(requests)
       const items = responses.map(r => r.body.items)
+      if (pruneFn) {
+        items.forEach(arr => arr.forEach(pruneTrack))
+      }
       return _.zipObject(TIME_RANGES, items)
     }
+  }
+
+  getTopArtists(options) {
+    let opt = !options ? {} : options
+    const getter = this.spotifyApi.getMyTopArtists.bind(this.spotifyApi)
+    return this.getTopHandler(getter, opt)
+  }
+
+  getTopTracks(options) {
+    let opt = !options ? {} : options
+    const getter = this.spotifyApi.getMyTopTracks.bind(this.spotifyApi)
+    return this.getTopHandler(getter, opt, pruneTrack)
   }
 }
 

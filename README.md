@@ -70,45 +70,45 @@ const lens = new SpotifyLens(spotifyApi)
 - `addCurrent` adds the currently being played track to the _Saved Songs_ library.
 - `nextTrack` lets the playback skip the current track to the next one.
 - `showPlaylists` returns all playlists and the corresponding id.
-- `getTopArtists({ time_range, limit, offset })` returns the spotify personalization information. In contrast to the default beheavior that set  `time_range` to `mid_term` when this options is not provided, this function return user taste in all three time ranges. The returned value look like this:
+- `getTopArtists({ time_range, limit, offset })` returns the spotify personalization information about top artistis. Same logic applies to `getTopTracks({ time_range, limit, offset })`
+  **NB**
+  This is **different** from the default beheavior as specified by Spotfiy documentation. According to documentation from Spotify, the `time_range` is set to `mid_term` as default value. However, this function return data in **all** three time ranges. The returned value look like this:
+
 ```json
 {
-    "long_term": [
-        {
-            //...
-            "genres": [
-            ],
-            "id": "4KXp3xtaz1wWXnu5u34eVX",
-            "images": [
-            ],
-            "popularity": 62,
-            "type": "artist",
-        },
-        // ...
-        ],
-    "mid_term" : [
-        {
-            //...
-        }
-    ],
-    "short_term" :[
-        {
-            //...
-        }
-    ]
+  "long_term": [
+    {
+      //...
+      "genres": [],
+      "id": "4KXp3xtaz1wWXnu5u34eVX",
+      "images": [],
+      "popularity": 62,
+      "type": "artist"
+    }
+    // ...
+  ],
+  "mid_term": [
+    {
+      //...
+    }
+  ],
+  "short_term": [
+    {
+      //...
+    }
+  ]
 }
-``` 
-- `//TODO`
+```
 
+- `//TODO`
 
 ## Configure
 
 In the `config.js`, you can configure some beheavior of the api.
 
-- `PRUNE_PLAYLIST_KEYS` contains the keys to be deleted when a `playlist` object is fetched from spotify api.   
-- The same logic applies to `PRUNE_TRACK_KEYS`.   
-- `SPOTIFY_SCOPES` contains the scopes required for Spotify API.   
-
+- `PRUNE_PLAYLIST_KEYS` contains the keys to be deleted when a `playlist` object is fetched from spotify api.
+- The same logic applies to `PRUNE_TRACK_KEYS`.
+- `SPOTIFY_SCOPES` contains the scopes required for Spotify API.
 
 ## Roadmap
 

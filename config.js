@@ -24,6 +24,7 @@ const PROMPT = {
     '  Export an ordered & ranked artists list. (based on a certain playlist)',
     '  List all playlists with its id',
     '  Export top 50 artists (according to Spotify)',
+    '  Export top 50 tracks (according to Spotify)',
     '--',
     '  Exit',
   ].map((el, idx) => {
