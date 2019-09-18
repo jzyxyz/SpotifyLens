@@ -129,6 +129,28 @@ class SpotifyLens {
       console.log(`${name} : ${id}`)
     })
   }
+
+  async getTopArtists({ time_range, limit, offset }) {
+    if (time_range) {
+      return await this.spotifyApi.getMyTopArtists({
+        time_range,
+        limit: limit || 50,
+        offset: offset || 0,
+      })
+    } else {
+      const TIME_RANGES = ['long_term', 'medium_term', 'short_term']
+      const requests = TIME_RANGES.map(tr =>
+        this.spotifyApi.getMyTopArtists({
+          time_range: tr,
+          limit: limit || 50,
+          offset: offset || 0,
+        }),
+      )
+      const responses = await Promise.all(requests)
+      const items = responses.map(r => r.body.items)
+      return _.zipObject(TIME_RANGES, items)
+    }
+  }
 }
 
 module.exports = SpotifyLens

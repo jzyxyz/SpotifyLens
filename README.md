@@ -64,12 +64,40 @@ const lens = new SpotifyLens(spotifyApi)
 
 #### Available methods
 
-- `getAllTracks(playlistId)` exports all tracks found in the playlist with `playlistId`.
-- `getFavArtists(playlistId)` exports a ordered & unique artists list whose works are found in the playlist with `playlistId`.
+- `getAllTracks(playlistId)` returns all tracks found in the playlist with `playlistId`.
+- `getFavArtists(playlistId)` returns a ordered & unique artists list whose works are found in the playlist with `playlistId`.
   If `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
 - `addCurrent` adds the currently being played track to the _Saved Songs_ library.
 - `nextTrack` lets the playback skip the current track to the next one.
-- `showPlaylists` shows all playlists and the corresponding id.
+- `showPlaylists` returns all playlists and the corresponding id.
+- `getTopArtists({ time_range, limit, offset })` returns the spotify personalization information. In contrast to the default beheavior that set  `time_range` to `mid_term` when this options is not provided, this function return user taste in all three time ranges. The returned value look like this:
+```json
+{
+    "long_term": [
+        {
+            //...
+            "genres": [
+            ],
+            "id": "4KXp3xtaz1wWXnu5u34eVX",
+            "images": [
+            ],
+            "popularity": 62,
+            "type": "artist",
+        },
+        // ...
+        ],
+    "mid_term" : [
+        {
+            //...
+        }
+    ],
+    "short_term" :[
+        {
+            //...
+        }
+    ]
+}
+``` 
 - `//TODO`
 
 
@@ -77,9 +105,9 @@ const lens = new SpotifyLens(spotifyApi)
 
 In the `config.js`, you can configure some beheavior of the api.
 
-`PRUNE_PLAYLIST_KEYS` contains the keys to be deleted when a `playlist` object is fetched from spotify api.
-The same logic applies to `PRUNE_TRACK_KEYS`.
-`SPOTIFY_SCOPES` contains the scopes required for Spotify API.
+- `PRUNE_PLAYLIST_KEYS` contains the keys to be deleted when a `playlist` object is fetched from spotify api.   
+- The same logic applies to `PRUNE_TRACK_KEYS`.   
+- `SPOTIFY_SCOPES` contains the scopes required for Spotify API.   
 
 
 ## Roadmap

@@ -100,16 +100,24 @@ class Worker {
           await Promise.all(tasks)
           break
         case 3:
-          const list = await this.lens.getFavArtists()
+          const FavArtistsList = await this.lens.getFavArtists()
           await writeToFile(
             path.join(this.outputDir, process.env.Artists),
             `fav_artists.json`,
-            JSON.stringify(list),
+            JSON.stringify(FavArtistsList),
           )
           console.log(`Found ${list.length} artists in total.`)
           break
         case 4:
           await this.lens.showPlaylists()
+          break
+        case 5:
+          const topArtistsList = await this.lens.getTopArtists({ limit: 5 })
+          await writeToFile(
+            path.join(this.outputDir, process.env.Artists),
+            `top_by_spotify.json`,
+            JSON.stringify(topArtistsList),
+          )
           break
         default:
           loop = false

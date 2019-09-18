@@ -21,8 +21,9 @@ const PROMPT = {
     '  Skip to next track',
     '--',
     '  Export all tracks from my library.',
-    '  Export an ordered & ranked artists list.',
+    '  Export an ordered & ranked artists list. (based on a certain playlist)',
     '  List all playlists with its id',
+    '  Export top 50 artists (according to Spotify)',
     '--',
     '  Exit',
   ].map((el, idx) => {
