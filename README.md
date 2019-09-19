@@ -1,34 +1,24 @@
 # SpotifyLens
 
-#### NB
+##### NB
 Recently the package will be updated quite often, i.e. many api changes may occur. Please always use the **latest** version.
 
-
 This is a **enhanced** wrapper for Spotify-api. It provides a simple api to the data otherwise have to be computed.
-e.g.
 
-- a list of unique & ordered artists from a playlist.
-- paged data concatation.
-- ...
-
-Along with the package also comes a simple-to-use cli with which these data can be exported to local `.json` file. In addition, some handy playback controls are also integrated.
-such as:
-
-- add current track to the library.
-- play the next track.
-- ...
+Along with the package also comes a interactive terminal interface with which these data can be exported to local `.json` file. In addition, some handy playback controls are integrated.
 
 ## Features
 
-- Interactive cli for controling over spotify and export data at the terminal.
-- Automatically refreshing access token in the interactive mode.
-- Get **contactnated** & **pruned** data of all tracks in **ANY** playlists. Speed garanteed by concurrent requests.
-- Get a list of **unique** & **ranked** artists based on the tracks from **ANY** playlist.
+- Interactive terminal interface for controling over spotify and export data.
+![screenshot](terminal_screenshot.jpg)
+- **Automatically** refreshes access token in the interactive mode. 
+- Get **contactnated** & **pruned** (configurable) data of **all** (no more 50 objects at a time!) tracks in **ANY** playlists. Concurrent requests garantees the execution is still fast even when the playlist is long .
+- Get a list of **unique** & **ranked** artists from **ANY** playlist. The artists are ranked by the number of works included in the playlist. So with this api you can analyze for example who are your favorite artists.
 - Genre analyzation for **ANY** playlist.
 
 ## How to
 
-1. Run interactively at the terminal
+### Run interactively at the terminal
 
   - Create a `.env` file containing these fields.  
     As for how to get secret and id, refer to the docs by Spotify.
@@ -37,22 +27,24 @@ such as:
   ClientSecret=YOUR SECRET HERE
   Port=3000
   OutputDir=data
-  All_Saved_Tracks=OUTPUT DIR OF TRACKS
-  Artists=OUTPUT DIR OF ARTISTS
+  Tracks=tracks
+  Artists=artists 
+  Genres=genresA
   ```  
   - Clone the repository then `npm install`  *OR* `npm i spotify-lens`.
   - `node run.js` and follow the instrcutions on the terminal. 
 
-2. Exploit api
+### Just use the core api
    
   - `npm i spotify-lens` 
-  - Manage the authentication yourself and pass a **authenticated** `SpotifyWebApiNode` instance to the `SpotifyLens` constructor.
+  - Manage the authentication yourself and pass an **authenticated** `SpotifyWebApiNode` instance to the `SpotifyLens` constructor.
 
   ```javascript
   const { SpotifyLens } = require('spotify-lens')
-  // authenticate with worker/spotify-web-api-node
-  const lens = new SpotifyLens(spotifyApi)
+
   //...
+  // authenticate with worker/spotify-web-api-node and pass an instance
+  const lens = new SpotifyLens(spotifyApi)
   const artistsList = await lens.getFavArtists()
   //...
 
@@ -62,7 +54,7 @@ such as:
 
 ### Worker
 
-The `Worker` class provides authentication flow and cli, refer to the `Worker.js` in the `src` folder.
+The `Worker` class provides authentication flow and cli.
 
 ### SpotifyLens
 
@@ -88,7 +80,9 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 ```
 - `analyzeGenreTokenized(playlistId)` is similar to `analyzeGenre` but will tokenize `tropical house` to `tropical` and `house`.
 - `getFavArtists(playlistId)` returns a ordered & unique artists list whose works are found in the playlist with `playlistId`.
-  If `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
+  
+  For the methods above, if `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
+
 - `addCurrent` adds the currently being played track to the _Saved Songs_ library.
 - `nextTrack` lets the playback skip the current track to the next one.
 - `showPlaylists` returns all playlists and the corresponding id.
@@ -140,4 +134,4 @@ In the `config.js`, you can configure some beheavior of the api.
 - [ ] Compare the similarties of two playlist.
 - [ ] Reorgnize code to be more maintainable.
 - [ ] Playlist Mood/Context/Properties analysis.
-- [ ] Rewrite the project in ReasonML/Typescript.
+- [ ] Rewrite the project in Typescript.

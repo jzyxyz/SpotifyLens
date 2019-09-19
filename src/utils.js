@@ -25,16 +25,6 @@ const distinctReduceBy = prop => (acc, cur) => {
   return acc
 }
 
-const readJsonFromFile = async absoPath => {
-  let text
-  try {
-    text = await fs.promises.readFile(absoPath)
-  } catch (error) {
-    errorHandler(error)(`Failed to open file ${absoPath}`)
-  }
-  return JSON.parse(text)
-}
-
 const errorHandler = error => msg => {
   console.log(msg)
   console.error(error)
@@ -59,7 +49,6 @@ module.exports = {
   pruneTrack,
   errorHandler,
   distinctReduceBy,
-  readJsonFromFile,
   writeToFile,
   pruneArtist,
 }
