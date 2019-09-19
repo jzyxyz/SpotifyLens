@@ -174,9 +174,6 @@ class SpotifyLens {
   }
 
   async analyzeGenre(playlistId) {
-    // let artistIdList = await readJsonFromFile(
-    //   path.join(process.cwd(), 'data', 'artists', 'fav_artists.json'),
-    // )
     let artistIdList = await this.getFavArtists(playlistId)
     artistIdList = artistIdList.map(el => el.id)
     const getter = this.spotifyApi.getArtists.bind(this.spotifyApi)

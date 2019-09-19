@@ -16,7 +16,10 @@
   "keywords": [
     "spotify",
     "spotify-api",
-    "cli"
+    "cli",
+    "spotify-data",
+    "api",
+    "spotify-wrapper"
   ],
   "dependencies": {
     "cookie-parser": "^1.4.4",

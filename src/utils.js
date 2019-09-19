@@ -37,7 +37,7 @@ const readJsonFromFile = async absoPath => {
 
 const errorHandler = error => msg => {
   console.log(msg)
-  // console.error(error)
+  console.error(error)
   throw new Error(error)
 }
 

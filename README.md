@@ -128,14 +128,16 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 
 In the `config.js`, you can configure some beheavior of the api.
 
-- `PRUNE_PLAYLIST_KEYS` contains the keys to be deleted when a `playlist` object is fetched from spotify api.
-- The same logic applies to `PRUNE_TRACK_KEYS`.
+- `PRUNE_***_KEYS` contains the keys to be deleted when a `***` object is fetched from spotify api.
 - `SPOTIFY_SCOPES` contains the scopes required for Spotify API.
+- `PROMPT` contains the cli.
 
 ## Roadmap
 
 - [x] Customize keys to export on objects.
 - [x] Top artists/tracks.
 - [x] Genre data.
+- [ ] Compare the similarties of two playlist.
+- [ ] Reorgnize code to be more maintainable.
 - [ ] Playlist Mood/Context/Properties analysis.
-- [ ] Rewrite the project in ReasonML/Typescript
+- [ ] Rewrite the project in ReasonML/Typescript.
