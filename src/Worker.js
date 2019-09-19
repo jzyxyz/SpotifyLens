@@ -148,6 +148,14 @@ class Worker {
             JSON.stringify(topTracksList),
           )
           break
+        case 7:
+          const genreList = await this.lens.analyzeGenre()
+          await writeToFile(
+            path.join(this.outputDir, process.env.Artists),
+            `top_artists_genres.json`,
+            JSON.stringify(genreList),
+          )
+          break
         default:
           loop = false
       }

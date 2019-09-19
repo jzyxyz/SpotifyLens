@@ -3,9 +3,11 @@ const {
   distinctReduceBy,
   pruneTrack,
   errorHandler,
-  prunePlaylist,
+  readJsonFromFile,
+  pruneArtist,
 } = require('./utils')
 const allSettled = require('promise.allsettled')
+const path = require('path')
 
 class SpotifyLens {
   constructor(spotifyApi, options) {
@@ -169,6 +171,33 @@ class SpotifyLens {
     let opt = !options ? {} : options
     const getter = this.spotifyApi.getMyTopTracks.bind(this.spotifyApi)
     return this.getTopHandler(getter, opt, pruneTrack)
+  }
+
+  async analyzeGenre(playlistId) {
+    // let artistIdList = await readJsonFromFile(
+    //   path.join(process.cwd(), 'data', 'artists', 'fav_artists.json'),
+    // )
+    let artistIdList = await this.getFavArtists(playlistId)
+    artistIdList = artistIdList.map(el => el.id)
+    const getter = this.spotifyApi.getArtists.bind(this.spotifyApi)
+    const tasks = _.chunk(artistIdList, 50).map(el => getter(el))
+    const dataArr = await Promise.all(tasks)
+    const genreList = _.flatMapDeep(dataArr, data =>
+      data.body.artists.map(a => a.genres),
+    )
+    const genreDict = genreList.reduce((acc, cur) => {
+      if (acc[cur]) {
+        acc[cur]['count'] += 1
+      } else {
+        acc[cur] = {
+          count: 1,
+          name: cur,
+        }
+      }
+      return acc
+    }, {})
+    const ordered = Object.values(genreDict)
+    return _.orderBy(ordered, ['count', 'name'], ['desc', 'asc'])
   }
 }
 

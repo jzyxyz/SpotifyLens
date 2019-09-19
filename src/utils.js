@@ -3,7 +3,11 @@ const { promisify } = require('util')
 let mkdirp = require('mkdirp')
 const path = require('path')
 mkdirp = promisify(mkdirp)
-const { PRUNE_PLAYLIST_KEYS, PRUNE_TRACK_KEYS } = require('../config')
+const {
+  PRUNE_PLAYLIST_KEYS,
+  PRUNE_TRACK_KEYS,
+  PRUNE_ARTIST_KEYS,
+} = require('../config')
 
 const prune = pruneKeys => obj => {
   pruneKeys.forEach(key => {
@@ -48,6 +52,7 @@ const writeToFile = async (dir, filename, string) => {
 
 const pruneTrack = prune(PRUNE_TRACK_KEYS)
 const prunePlaylist = prune(PRUNE_PLAYLIST_KEYS)
+const pruneArtist = prune(PRUNE_ARTIST_KEYS)
 
 module.exports = {
   prunePlaylist,
@@ -56,4 +61,5 @@ module.exports = {
   distinctReduceBy,
   readJsonFromFile,
   writeToFile,
+  pruneArtist,
 }

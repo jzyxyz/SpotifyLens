@@ -25,6 +25,7 @@ const PROMPT = {
     '  List all playlists with its id',
     '  Export top 50 artists (according to Spotify)',
     '  Export top 50 tracks (according to Spotify)',
+    '  Export genre data',
     '--',
     '  Exit',
   ].map((el, idx) => {
@@ -64,9 +65,12 @@ const PRUNE_TRACK_KEYS = [
   'is_local',
 ]
 
+const PRUNE_ARTIST_KEYS = ['external_urls', 'followers', 'popularity', 'images']
+
 module.exports = {
   SPOTIFY_SCOPES,
   PROMPT,
   PRUNE_PLAYLIST_KEYS,
   PRUNE_TRACK_KEYS,
+  PRUNE_ARTIST_KEYS,
 }

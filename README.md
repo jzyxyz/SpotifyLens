@@ -24,6 +24,7 @@ such as:
 - Automatically refreshing access token in the interactive mode.
 - Get **contactnated** & **pruned** data of all tracks in **ANY** playlists. Speed garanteed by concurrent requests.
 - Get a list of **unique** & **ranked** artists based on the tracks from **ANY** playlist.
+  Genre analyzation for **ANY** playlist.
 
 ## How to
 
@@ -70,6 +71,21 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 #### Available methods
 
 - `getAllTracks(playlistId)` returns all tracks found in the playlist with `playlistId`.
+- `analyzeGenre(playlistId)` examines the artists in the playlist wtih `playlistId` and return a counted genre representation.
+```json
+[
+  //...
+   {
+        "count": 82,
+        "name": "tropical house"
+    },
+    {
+        "count": 60,
+        "name": "dance pop"
+    },
+    //...
+]
+```
 - `getFavArtists(playlistId)` returns a ordered & unique artists list whose works are found in the playlist with `playlistId`.
   If `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
 - `addCurrent` adds the currently being played track to the _Saved Songs_ library.
@@ -119,5 +135,5 @@ In the `config.js`, you can configure some beheavior of the api.
 
 - [x] Customize keys to export on objects.
 - [x] Top artists/tracks.
-- [ ] Genre data.
+- [x] Genre data.
 - [ ] Non-blocking object prune to improve performance.
