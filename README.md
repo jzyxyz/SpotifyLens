@@ -1,7 +1,7 @@
 # SpotifyLens
 
-## NB
-Recently the package will be updated quite often, i.e. many api changes may occur. Please always use the latest version.
+#### NB
+Recently the package will be updated quite often, i.e. many api changes may occur. Please always use the **latest** version.
 
 
 This is a **enhanced** wrapper for Spotify-api. It provides a simple api to the data otherwise have to be computed.
@@ -136,4 +136,4 @@ In the `config.js`, you can configure some beheavior of the api.
 - [x] Customize keys to export on objects.
 - [x] Top artists/tracks.
 - [x] Genre data.
-- [ ] Non-blocking object prune to improve performance.
+- [ ] Playlist Mood/Context/Properties analysis.
