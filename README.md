@@ -12,7 +12,7 @@ Along with the package also comes a interactive terminal interface with which th
 - Interactive terminal interface for controling over spotify and export data.
 ![screenshot](terminal_screenshot.jpg)
 - **Automatically** refreshes access token in the interactive mode. 
-- Get **contactnated** & **pruned** (configurable) data of **all** (no more 50 objects at a time!) tracks in **ANY** playlists. Concurrent requests garantees the execution is still fast even when the playlist is long .
+- Get **contactnated** & **pruned** (configurable) data of **all** (Say goodbye to 50 objects at a time!) tracks in **ANY** playlists. Concurrent requests garantees the execution is still fast even when the playlist is long .
 - Get a list of **unique** & **ranked** artists from **ANY** playlist. The artists are ranked by the number of works included in the playlist. So with this api you can analyze for example who are your favorite artists.
 - Genre analyzation for **ANY** playlist.
 
