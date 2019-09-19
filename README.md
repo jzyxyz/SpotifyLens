@@ -24,7 +24,7 @@ such as:
 - Automatically refreshing access token in the interactive mode.
 - Get **contactnated** & **pruned** data of all tracks in **ANY** playlists. Speed garanteed by concurrent requests.
 - Get a list of **unique** & **ranked** artists based on the tracks from **ANY** playlist.
-  Genre analyzation for **ANY** playlist.
+- Genre analyzation for **ANY** playlist.
 
 ## How to
 
