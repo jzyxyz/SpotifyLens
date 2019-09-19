@@ -15,6 +15,7 @@ let cnt = 0
 const PROMPT = {
   type: 'list',
   name: 'operations',
+  pageSize: 15,
   message: 'What do you like me to do?',
   choices: [
     '  Add the current playing track to Saved songs',

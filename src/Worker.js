@@ -8,6 +8,7 @@ const inquirer = require('inquirer')
 const open = require('open')
 const { SPOTIFY_SCOPES: scopes, PROMPT: prompt } = require('../config')
 const path = require('path')
+const chalk = require('chalk')
 
 class Worker {
   constructor() {
@@ -110,7 +111,7 @@ class Worker {
             const filename = playlistId =>
               `${playlistId ? playlistId.slice(0, 7) : 'tracks'}_${idx}.json`
             await writeToFile(
-              path.join(this.outputDir, process.env.All_Saved_Tracks),
+              path.join(this.outputDir, process.env.Tracks),
               filename(playlistId),
               JSON.stringify(el),
             )
@@ -124,7 +125,6 @@ class Worker {
             `fav_artists.json`,
             JSON.stringify(favArtistsList),
           )
-          console.log(`Found ${favArtistsList.length} artists in total.`)
           break
         case 4:
           const playLists = await this.lens.showPlaylists()
@@ -143,7 +143,7 @@ class Worker {
         case 6:
           const topTracksList = await this.lens.getTopTracks()
           await writeToFile(
-            path.join(this.outputDir, process.env.Artists),
+            path.join(this.outputDir, process.env.Tracks),
             `top_tracks_by_spotify.json`,
             JSON.stringify(topTracksList),
           )
@@ -151,23 +151,23 @@ class Worker {
         case 7:
           const genreList = await this.lens.analyzeGenre()
           await writeToFile(
-            path.join(this.outputDir, process.env.Artists),
-            `top_artists_genres.json`,
+            path.join(this.outputDir, process.env.Genres),
+            `top_genres.json`,
             JSON.stringify(genreList),
           )
           break
         case 8:
           const genreTokenizedList = await this.lens.analyzeGenreTokenized()
           await writeToFile(
-            path.join(this.outputDir, process.env.Artists),
-            `top_artists_genres_tokenized.json`,
+            path.join(this.outputDir, process.env.Genres),
+            `top_genres_tokenized.json`,
             JSON.stringify(genreTokenizedList),
           )
           break
         default:
           loop = false
       }
-      console.log('Done! ')
+      console.log(chalk.green.bold('Done!'))
     }
     clearInterval(this.refreshIntervalId)
     process.exit(0)

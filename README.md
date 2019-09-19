@@ -37,7 +37,7 @@ such as:
   ClientSecret=YOUR SECRET HERE
   Port=3000
   OutputDir=data
-  All_Saved_Tracks=OUTPUT DIR OF TRACKS
+  Tracks=OUTPUT DIR OF TRACKS
   Artists=OUTPUT DIR OF ARTISTS
   ```  
   - Clone the repository then `npm install`  *OR* `npm i spotify-lens`.

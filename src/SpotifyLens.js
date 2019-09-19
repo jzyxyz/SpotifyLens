@@ -1,13 +1,9 @@
 const _ = require('lodash')
-const {
-  distinctReduceBy,
-  pruneTrack,
-  errorHandler,
-  readJsonFromFile,
-  pruneArtist,
-} = require('./utils')
+const { distinctReduceBy, pruneTrack, errorHandler } = require('./utils')
 const allSettled = require('promise.allsettled')
-const path = require('path')
+const chalk = require('chalk')
+const info = chalk.blue
+const error = chalk.red
 
 class SpotifyLens {
   constructor(spotifyApi, options) {
@@ -25,11 +21,10 @@ class SpotifyLens {
         return this.spotifyApi.getMySavedTracks(options)
       }
     }
-    let data = await getter(playlistId)({ offset: 0, limit })
     const {
       body: { total },
-    } = data
-    console.log(`Total: ${total} tracks found`)
+    } = await getter(playlistId)({ offset: 0, limit })
+    console.log(info(`Total: ${total} tracks found`))
 
     const batch = Math.ceil(total / limit)
     const requests = _.range(0, batch).map(i =>
@@ -38,15 +33,6 @@ class SpotifyLens {
         limit,
       }),
     )
-
-    // const dataReducer = (acc, cur, idx) => {
-    //   if (typeof cur === 'number') {
-    //     rejected.push(cur)
-    //   } else {
-    //     return acc.concat(cur)
-    //   }
-    // }
-
     const responses = await allSettled(requests)
     //TO DO: fix rejected requests
     const rejected = []
@@ -67,14 +53,14 @@ class SpotifyLens {
         return null
       }
     }
-
-    console.log(`Failed requests: ${rejected.length}`)
+    if (rejected.length) {
+      console.log(error(`Failed requests: ${rejected.length}`))
+    }
     return _.compact(responses.map(responseHandler))
   }
 
   async getFavArtists(playlistId) {
-    let trackList = await this.getAllTracks(playlistId)
-    trackList = _.flatten(trackList)
+    const trackList = _.flatten(await this.getAllTracks(playlistId))
     const dict = _.flatMap(trackList, el => {
       el.track.artists.forEach(el => {
         el.count = 1
@@ -82,23 +68,17 @@ class SpotifyLens {
       return el.track.artists
     }).reduce(distinctReduceBy('id'), {})
     const finalList = _.flatMap(Object.values(dict))
-    const ordered = _.orderBy(finalList, ['count', 'name'], ['desc', 'asc'])
-    return ordered
+    console.log(info(`Total: ${finalList.length} artists found`))
+    return _.orderBy(finalList, ['count', 'name'], ['desc', 'asc'])
   }
 
   async addCurrent() {
-    let currentTrack
-    try {
-      currentTrack = await this.spotifyApi.getMyCurrentPlayingTrack()
-    } catch (error) {
-      errorHandler(error)('Failed to get data from Spotify')
-    }
     const {
       body: {
         item: { id, name },
       },
-    } = currentTrack
-    console.log(`Now playing ${name}`)
+    } = await this.spotifyApi.getMyCurrentPlayingTrack()
+    console.log(info(`Now playing ${name}`))
     try {
       await this.spotifyApi.addToMySavedTracks([id])
     } catch (error) {
@@ -107,32 +87,20 @@ class SpotifyLens {
   }
 
   async nextTrack() {
-    console.log(process.cwd())
     try {
       await this.spotifyApi.skipToNext()
     } catch (error) {
-      errorHandler(error)('Failed to do so....')
+      errorHandler(error)('Failed to skip to the next one')
     }
   }
 
   async showPlaylists() {
-    let data
-    try {
-      data = await this.spotifyApi.getUserPlaylists()
-    } catch (error) {
-      errorHandler(error)('Failed to do so....')
-    }
     const {
       body: { items },
-    } = data
-    // items.forEach(el => {
-    //   prunePlaylist(el)
-    //   const { name, id } = el
-    //   console.log()
-    // })
+    } = await this.spotifyApi.getUserPlaylists()
     return items.map(el => {
       const { name, id } = el
-      return `${name} : ${id}`
+      return { name, id }
     })
   }
 
@@ -174,54 +142,40 @@ class SpotifyLens {
   }
 
   async analyzeGenre(playlistId) {
-    let artistIdList = await this.getFavArtists(playlistId)
-    artistIdList = artistIdList.map(el => el.id)
+    const artistIdList = (await this.getFavArtists(playlistId)).map(el => el.id)
     const getter = this.spotifyApi.getArtists.bind(this.spotifyApi)
     const tasks = _.chunk(artistIdList, 50).map(el => getter(el))
     const dataArr = await Promise.all(tasks)
     const genreList = _.flatMapDeep(dataArr, data =>
-      data.body.artists.map(a => a.genres),
-    )
-    const genreDict = genreList.reduce((acc, cur) => {
-      if (acc[cur]) {
-        acc[cur]['count'] += 1
-      } else {
-        acc[cur] = {
+      data.body.artists.map(a =>
+        a.genres.map(g => ({
+          name: g,
           count: 1,
-          name: cur,
-        }
-      }
-      return acc
-    }, {})
+        })),
+      ),
+    )
+    const genreDict = genreList.reduce(distinctReduceBy('name'), {})
     const ordered = Object.values(genreDict)
+    console.log(info(`Total: ${ordered.length} genres found`))
     return _.orderBy(ordered, ['count', 'name'], ['desc', 'asc'])
   }
 
   async analyzeGenreTokenized(playlistId) {
     const genreList = await this.analyzeGenre(playlistId)
-    let tokenDict = _.flatMapDeep(genreList, el => {
+    const tokenDict = _.flatMapDeep(genreList, el => {
       const tokens = el.name.split(/\s+/)
       return tokens.map(t => ({
-        token: t,
-        count: 1,
+        name: t,
+        count: el.count,
       }))
-    }).reduce((acc, cur) => {
-      const { token } = cur
-      if (acc[token]) {
-        acc[token]['count'] += 1
-      } else {
-        acc[token] = {
-          count: 1,
-          token,
-        }
-      }
-      return acc
-    }, {})
-    return _.orderBy(
+    }).reduce(distinctReduceBy('name'), {})
+    const ordered = _.orderBy(
       Object.values(tokenDict),
-      ['count', 'token'],
+      ['count', 'name'],
       ['desc', 'asc'],
     )
+    console.log(info(`Total: ${ordered.length} genre tokens found`))
+    return ordered
   }
 }
 
