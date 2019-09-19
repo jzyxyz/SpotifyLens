@@ -26,6 +26,7 @@ const PROMPT = {
     '  Export top 50 artists (according to Spotify)',
     '  Export top 50 tracks (according to Spotify)',
     '  Export genre data',
+    '  Export genre data (tokenized)',
     '--',
     '  Exit',
   ].map((el, idx) => {

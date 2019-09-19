@@ -86,6 +86,7 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
     //...
 ]
 ```
+- `analyzeGenreTokenized(playlistId)` is similar to `analyzeGenre` but will tokenize `tropical house` to `tropical` and `house`.
 - `getFavArtists(playlistId)` returns a ordered & unique artists list whose works are found in the playlist with `playlistId`.
   If `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
 - `addCurrent` adds the currently being played track to the _Saved Songs_ library.
@@ -137,3 +138,4 @@ In the `config.js`, you can configure some beheavior of the api.
 - [x] Top artists/tracks.
 - [x] Genre data.
 - [ ] Playlist Mood/Context/Properties analysis.
+- [ ] Rewrite the project in ReasonML/Typescript

@@ -199,6 +199,33 @@ class SpotifyLens {
     const ordered = Object.values(genreDict)
     return _.orderBy(ordered, ['count', 'name'], ['desc', 'asc'])
   }
+
+  async analyzeGenreTokenized(playlistId) {
+    const genreList = await this.analyzeGenre(playlistId)
+    let tokenDict = _.flatMapDeep(genreList, el => {
+      const tokens = el.name.split(/\s+/)
+      return tokens.map(t => ({
+        token: t,
+        count: 1,
+      }))
+    }).reduce((acc, cur) => {
+      const { token } = cur
+      if (acc[token]) {
+        acc[token]['count'] += 1
+      } else {
+        acc[token] = {
+          count: 1,
+          token,
+        }
+      }
+      return acc
+    }, {})
+    return _.orderBy(
+      Object.values(tokenDict),
+      ['count', 'token'],
+      ['desc', 'asc'],
+    )
+  }
 }
 
 module.exports = SpotifyLens
