@@ -81,7 +81,7 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 ```
 - `analyzeGenreTokenized(playlistId)` is similar to `analyzeGenre` but will tokenize `tropical house` to `tropical` and `house`.
 - `getFavArtists(playlistId)` returns a ordered & unique artists list whose works are found in the playlist with `playlistId`.
-- - `analyzeAudioFeatures(playlistId)` returns an overall average of features: `'danceability','energy','key','loudness','mode','speechiness','acousticness','instrumentalness','liveness','valence','tempo'`
+- `analyzeAudioFeatures(playlistId)` returns an overall average of features: `'danceability','energy','key','loudness','mode','speechiness','acousticness','instrumentalness','liveness','valence','tempo'`
   
   For the methods above, if `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
 
