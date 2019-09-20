@@ -1,65 +1,75 @@
 const _ = require('lodash')
 const { distinctReduceBy, pruneTrack, errorHandler } = require('./utils')
-const allSettled = require('promise.allsettled')
 const chalk = require('chalk')
 const info = chalk.blue
-const error = chalk.red
+const DEFAULT_LIMIT = 50
+const FEATURE_KEYS = [
+  'danceability',
+  'energy',
+  'key',
+  'loudness',
+  'mode',
+  'speechiness',
+  'acousticness',
+  'instrumentalness',
+  'liveness',
+  'valence',
+  'tempo',
+]
 
 class SpotifyLens {
   constructor(spotifyApi) {
     this.spotifyApi = spotifyApi
+    this.spotifyApi.getUserPlaylists = this.spotifyApi.getUserPlaylists.bind(
+      this.spotifyApi,
+    )
+    this.spotifyApi.getPlaylistTracks = this.spotifyApi.getPlaylistTracks.bind(
+      this.spotifyApi,
+    )
+    this.spotifyApi.getMySavedTracks = this.spotifyApi.getMySavedTracks.bind(
+      this.spotifyApi,
+    )
+  }
+
+  concatWrapper(getter) {
+    return async function(id) {
+      const limit = DEFAULT_LIMIT
+      const {
+        body: { total },
+      } = await getter({ offset: 0, limit })
+      console.log(info(`Total: ${total} objects found`))
+      const batch = Math.ceil(total / limit)
+      return _.range(0, batch).map(async i =>
+        id
+          ? getter(id, {
+              offset: i * limit,
+              limit,
+            })
+          : getter({
+              offset: i * limit,
+              limit,
+            }),
+      )
+    }
   }
 
   async getAllTracks(playlistId) {
-    const limit = 50
+    const getter = playlistId
+      ? this.spotifyApi.getPlaylistTracks
+      : this.spotifyApi.getMySavedTracks
 
-    const getter = playlistId => options => {
-      if (playlistId) {
-        return this.spotifyApi.getPlaylistTracks(playlistId, options)
-      } else {
-        return this.spotifyApi.getMySavedTracks(options)
-      }
-    }
-    const {
-      body: { total },
-    } = await getter(playlistId)({ offset: 0, limit })
-    console.log(info(`Total: ${total} tracks found`))
-
-    const batch = Math.ceil(total / limit)
-    const requests = _.range(0, batch).map(i =>
-      getter(playlistId)({
-        offset: i * limit,
-        limit,
-      }),
-    )
-    const responses = await allSettled(requests)
-    //TO DO: fix rejected requests
-    const rejected = []
-
-    const responseHandler = (r, idx) => {
-      if (r.status === 'fulfilled') {
-        const {
-          value: {
-            body: { items },
-          },
-        } = r
-        items.forEach(item => {
-          pruneTrack(item.track)
-        })
-        return items
-      } else {
-        rejected.push(idx)
-        return null
-      }
-    }
-    if (rejected.length) {
-      console.log(error(`Failed requests: ${rejected.length}`))
-    }
-    return _.compact(responses.map(responseHandler))
+    const tasks = await this.concatWrapper(getter)(playlistId)
+    const responses = await Promise.all(tasks)
+    const tracks = _.flatMap(responses, el => el.body.items)
+    tracks.forEach(t => {
+      const { track } = t
+      pruneTrack(track)
+    })
+    return tracks
   }
 
   async getAllArtists(playlistId) {
-    const trackList = _.flatten(await this.getAllTracks(playlistId))
+    const trackList = await this.getAllTracks(playlistId)
     const dict = _.flatMap(trackList, el => {
       el.track.artists.forEach(el => {
         el.count = 1
@@ -86,13 +96,13 @@ class SpotifyLens {
   }
 
   async showPlaylists() {
-    const {
-      body: { items },
-    } = await this.spotifyApi.getUserPlaylists()
-    return items.map(el => {
-      const { name, id } = el
-      return { name, id }
-    })
+    const tasks = await this.concatWrapper(this.spotifyApi.getUserPlaylists)()
+    const data = await Promise.all(tasks)
+    const items = _.flatMap(data, el => el.body.items)
+    return items.map(({ name, id }) => ({
+      name,
+      id,
+    }))
   }
 
   async getTopHandler(getter, { time_range, limit, offset }, pruneFn) {
@@ -100,14 +110,14 @@ class SpotifyLens {
     if (time_range) {
       return await getter({
         time_range,
-        limit: limit || 50,
+        limit: limit || DEFAULT_LIMIT,
         offset: offset || 0,
       })
     } else {
       const requests = TIME_RANGES.map(tr =>
         getter({
           time_range: tr,
-          limit: limit || 50,
+          limit: limit || DEFAULT_LIMIT,
           offset: offset || 0,
         }),
       )
@@ -135,7 +145,7 @@ class SpotifyLens {
   async analyzeGenre(playlistId) {
     const artistIdList = (await this.getAllArtists(playlistId)).map(el => el.id)
     const getter = this.spotifyApi.getArtists.bind(this.spotifyApi)
-    const tasks = _.chunk(artistIdList, 50).map(el => getter(el))
+    const tasks = _.chunk(artistIdList, DEFAULT_LIMIT).map(el => getter(el))
     const dataArr = await Promise.all(tasks)
     const genreList = _.flatMapDeep(dataArr, data =>
       data.body.artists.map(a =>
@@ -170,28 +180,15 @@ class SpotifyLens {
   }
 
   async analyzeAudioFeatures(playlistId) {
-    const trackIdArr = _.flatten(await this.getAllTracks(playlistId)).map(
+    const trackIdArr = (await this.getAllTracks(playlistId)).map(
       el => el.track.id,
     )
-    const chunks = _.chunk(trackIdArr, 50)
+    const chunks = _.chunk(trackIdArr, DEFAULT_LIMIT)
     const data = await Promise.all(
       chunks.map(ch => this.spotifyApi.getAudioFeaturesForTracks(ch)),
     )
     const audioFeatures = _.flatMap(data, d => d.body.audio_features)
-    // console.log(JSON.stringify(audioFeatures))
-    const FEATURE_KEYS = [
-      'danceability',
-      'energy',
-      'key',
-      'loudness',
-      'mode',
-      'speechiness',
-      'acousticness',
-      'instrumentalness',
-      'liveness',
-      'valence',
-      'tempo',
-    ]
+
     const average = audioFeatures.reduce((acc, cur) => {
       const obj = {}
       FEATURE_KEYS.forEach(key => {

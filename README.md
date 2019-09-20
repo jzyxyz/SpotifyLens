@@ -65,7 +65,7 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 #### Available methods
 
 
-- Since the core is an enhanced version of `spotify-web-api-node`, any methods from `spotify-web-api-node` are still valid! To call them, just `lens.spotifyApi.METHOD_NAME`.
+- Since the core is an enhanced version of `spotify-web-api-node`, any methods from `spotify-web-api-node` are still valid! To call them, just prefix it with `.spotifyApi`. 
 - `getAllTracks(playlistId)` returns all tracks found in the playlist with `playlistId`.
 - `analyzeGenre(playlistId)` examines the artists in the playlist wtih `playlistId` and return a counted genre representation.
 ```json
@@ -108,9 +108,6 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 - `getTopArtists({ time_range, limit, offset })` returns the spotify personalization information about top artistis. Same logic applies to `getTopTracks({ time_range, limit, offset })`
   **NB**
   This is **different** from the default beheavior as specified by Spotfiy documentation. According to documentation from Spotify, the `time_range` is set to `mid_term` as default value. However, this function return data in **all** three time ranges. The returned value look like this:
-- **DEPRECATED** `nextTrack` lets the playback skip the current track to the next one. Use `skipToNext()` from `spotify-web-api-node` instead. 
-
-
 ```json
 {
   "long_term": [
@@ -136,6 +133,9 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
   ]
 }
 ```
+- **DEPRECATED** `nextTrack` lets the playback skip the current track to the next one. Use `skipToNext()` from `spotify-web-api-node` instead. 
+
+
 
 
 
