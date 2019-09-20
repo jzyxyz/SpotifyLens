@@ -85,14 +85,6 @@ class SpotifyLens {
     }
   }
 
-  async nextTrack() {
-    try {
-      await this.spotifyApi.skipToNext()
-    } catch (error) {
-      errorHandler(error)('Failed to skip to the next one')
-    }
-  }
-
   async showPlaylists() {
     const {
       body: { items },

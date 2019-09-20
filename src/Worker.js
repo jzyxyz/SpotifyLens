@@ -102,7 +102,11 @@ class Worker {
           await this.lens.addCurrent()
           break
         case 1:
-          await this.lens.nextTrack()
+          try {
+            await this.spotifyApi.skipToNext()
+          } catch (error) {
+            errorHandler(error)('Failed to skip to the next one')
+          }
           break
         case 2:
           // const playlistId = '4ADFwns89Zo5O3ea13wFG3'
@@ -120,11 +124,11 @@ class Worker {
           await Promise.all(tasks)
           break
         case 3:
-          const favArtistsList = await this.lens.getAllArtists()
+          const allArtistsList = await this.lens.getAllArtists()
           await writeToFile(
             path.join(this.outputDir, process.env.Artists),
             `fav_artists.json`,
-            JSON.stringify(favArtistsList),
+            JSON.stringify(allArtistsList),
           )
           break
         case 4:

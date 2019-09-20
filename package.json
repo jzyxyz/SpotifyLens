@@ -1,6 +1,6 @@
 {
   "name": "spotify-lens",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "This is a enhanced wrapper for Spotify-api. It provides a simple api to the data otherwise have to be computed. It also provides a cli playback control and data export",
   "main": "index.js",
   "scripts": {
