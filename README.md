@@ -13,7 +13,7 @@ Along with the package also comes a interactive terminal interface with which th
 ![screenshot](terminal_screenshot.jpg)
 - **Automatically** refreshes access token in the interactive mode. 
 - Get **contactnated** & **pruned** (configurable) data of **all** (Say goodbye to 50 objects at a time!) tracks in **ANY** playlists. Concurrent requests garantees the execution is still fast even when the playlist is long .
-- Get a list of **ranked** artists from **ANY** playlist. The artists are ranked by the number of works included in the playlist. So with this api you can analyze for example who are your favorite artists.
+- Get a list of **ranked** artists from **ANY** playlist. 
 - Genre analyzation for **ANY** playlist.
 - **Playlist-oriented** audio features analysis.
 
@@ -30,7 +30,8 @@ Along with the package also comes a interactive terminal interface with which th
   OutputDir=data
   Tracks=tracks
   Artists=artists 
-  Genres=genresA
+  Genres=genres
+  AudioFeatures=audio_features
   ```  
   - Clone the repository then `npm install`  *OR* `npm i spotify-lens`.
   - `node run.js` and follow the instrcutions on the terminal. 
@@ -80,8 +81,23 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 ]
 ```
 - `analyzeGenreTokenized(playlistId)` is similar to `analyzeGenre` but will tokenize `tropical house` to `tropical` and `house`.
-- `getFavArtists(playlistId)` returns a ordered & unique artists list whose works are found in the playlist with `playlistId`.
-- `analyzeAudioFeatures(playlistId)` returns an overall average of features: `'danceability','energy','key','loudness','mode','speechiness','acousticness','instrumentalness','liveness','valence','tempo'`
+- `getAllArtists(playlistId)` returns a ranked artists list whose works are found in the playlist with `playlistId`. The artists are ranked by the number of works included in the playlist. So with this api you can analyze for example who are your favorite artists.
+- `analyzeAudioFeatures(playlistId)` returns an overall average of features: `'danceability','energy','key','loudness','mode','speechiness','acousticness','instrumentalness','liveness','valence','tempo'`.
+```json
+{
+    "danceability": 0.6460605819748739,
+    "energy": 0.7151449681068482,
+    "key": 6.833670195008889,
+    "loudness": -6.782919252678676,
+    "mode": 0.16876905772482756,
+    "speechiness": 0.04087642070605159,
+    "acousticness": 0.03041756089694307,
+    "instrumentalness": 0.0022137601251104467,
+    "liveness": 0.21600389719016522,
+    "valence": 0.44158085756109505,
+    "tempo": 128.1000903658005
+}
+```
   
   For the methods above, if `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
 
