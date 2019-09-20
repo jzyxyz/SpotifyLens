@@ -19,7 +19,6 @@ class Worker {
       clientSecret: process.env.ClientSecret,
       redirectUri: REDIRECT_URL,
     })
-
     this.app = express()
     this.app.use(cors()).use(cookieParser())
     // necessary
@@ -91,6 +90,8 @@ class Worker {
         errorHandler(error)('Failed to refresh access token')
       }
     }, 3000000)
+    // const id = `37i9dQZEVXbLoATJ81JYXz`
+    const id = undefined
 
     let loop = true
     while (loop) {
@@ -109,18 +110,18 @@ class Worker {
           }
           break
         case 2:
-          const allTracks = await this.lens.getAllTracks()
+          const allTracks = await this.lens.getAllTracks(id)
           await writeToFile(
             path.join(this.outputDir, process.env.Tracks),
-            `default_all_saved_tracks.json`,
+            `default_all_saved_tracks_${id ? id.slice(0, 6) : ''}.json`,
             JSON.stringify(allTracks),
           )
           break
         case 3:
-          const allArtistsList = await this.lens.getAllArtists()
+          const allArtistsList = await this.lens.getAllArtists(id)
           await writeToFile(
             path.join(this.outputDir, process.env.Artists),
-            `fav_artists.json`,
+            `fav_artists_${id ? id.slice(0, 6) : ''}.json`,
             JSON.stringify(allArtistsList),
           )
           break
@@ -152,28 +153,29 @@ class Worker {
           )
           break
         case 7:
-          const genreList = await this.lens.analyzeGenre()
+          const genreList = await this.lens.analyzeGenre(id)
           await writeToFile(
             path.join(this.outputDir, process.env.Genres),
-            `top_genres.json`,
+            `top_genres_${id ? id.slice(0, 6) : ''}.json`,
             JSON.stringify(genreList),
           )
           break
         case 8:
-          const genreTokenizedList = await this.lens.analyzeGenreTokenized()
+          const genreTokenizedList = await this.lens.analyzeGenreTokenized(id)
           await writeToFile(
             path.join(this.outputDir, process.env.Genres),
-            `top_genres_tokenized.json`,
+            `top_genres_tokenized_${id ? id.slice(0, 6) : ''}.json`,
             JSON.stringify(genreTokenizedList),
           )
           break
         case 9:
-          const audioFeatures = await this.lens.analyzeAudioFeatures()
+          const audioFeatures = await this.lens.analyzeAudioFeatures(id)
           await writeToFile(
             path.join(this.outputDir, process.env.AudioFeatures),
-            `default_tracks_audio_features.json`,
+            `default_tracks_audio_features_${id ? id.slice(0, 6) : ''}.json`,
             JSON.stringify(audioFeatures),
           )
+          break
         default:
           loop = false
       }
