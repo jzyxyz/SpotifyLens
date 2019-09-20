@@ -22,7 +22,7 @@ const PROMPT = {
     '  Skip to the next track',
     '--',
     '  Export all tracks in Saved songs',
-    '  Export an ordered & ranked artists list based on Saved songs',
+    '  Export a ranked artists list based on Saved songs',
     '  List all playlists with its id',
     '  Export top 50 artists',
     '  Export top 50 tracks',

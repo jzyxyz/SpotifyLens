@@ -120,7 +120,7 @@ class Worker {
           await Promise.all(tasks)
           break
         case 3:
-          const favArtistsList = await this.lens.getFavArtists()
+          const favArtistsList = await this.lens.getAllArtists()
           await writeToFile(
             path.join(this.outputDir, process.env.Artists),
             `fav_artists.json`,

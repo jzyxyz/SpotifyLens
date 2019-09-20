@@ -9,12 +9,13 @@ Along with the package also comes a interactive terminal interface with which th
 
 ## Features
 
-- Interactive terminal interface for controling over spotify and export data.
+- **Interactive REPL** terminal interface for controling over spotify and export data.
 ![screenshot](terminal_screenshot.jpg)
 - **Automatically** refreshes access token in the interactive mode. 
 - Get **contactnated** & **pruned** (configurable) data of **all** (Say goodbye to 50 objects at a time!) tracks in **ANY** playlists. Concurrent requests garantees the execution is still fast even when the playlist is long .
-- Get a list of **unique** & **ranked** artists from **ANY** playlist. The artists are ranked by the number of works included in the playlist. So with this api you can analyze for example who are your favorite artists.
+- Get a list of **ranked** artists from **ANY** playlist. The artists are ranked by the number of works included in the playlist. So with this api you can analyze for example who are your favorite artists.
 - Genre analyzation for **ANY** playlist.
+- **Playlist-oriented** audio features analysis.
 
 ## How to
 
@@ -80,6 +81,7 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 ```
 - `analyzeGenreTokenized(playlistId)` is similar to `analyzeGenre` but will tokenize `tropical house` to `tropical` and `house`.
 - `getFavArtists(playlistId)` returns a ordered & unique artists list whose works are found in the playlist with `playlistId`.
+- - `analyzeAudioFeatures(playlistId)` returns an overall average of features: `'danceability','energy','key','loudness','mode','speechiness','acousticness','instrumentalness','liveness','valence','tempo'`
   
   For the methods above, if `playlistId` is `undefined`, it will target at the _Saved Songs_ library.
 
@@ -116,7 +118,7 @@ The `SpotifyLens` class provides core functions, and is well-suited to be embede
 }
 ```
 
-- `//TODO`
+
 
 ## Configure
 
@@ -131,7 +133,6 @@ In the `config.js`, you can configure some beheavior of the api.
 - [x] Customize keys to export on objects.
 - [x] Top artists/tracks.
 - [x] Genre data.
-- [ ] Compare the similarties of two playlist.
 - [ ] Reorgnize code to be more maintainable.
-- [ ] Playlist Mood/Context/Properties analysis.
+- [x] Playlist audio features analysis.
 - [ ] Rewrite the project in Typescript.

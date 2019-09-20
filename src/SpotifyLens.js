@@ -58,7 +58,7 @@ class SpotifyLens {
     return _.compact(responses.map(responseHandler))
   }
 
-  async getFavArtists(playlistId) {
+  async getAllArtists(playlistId) {
     const trackList = _.flatten(await this.getAllTracks(playlistId))
     const dict = _.flatMap(trackList, el => {
       el.track.artists.forEach(el => {
@@ -141,7 +141,7 @@ class SpotifyLens {
   }
 
   async analyzeGenre(playlistId) {
-    const artistIdList = (await this.getFavArtists(playlistId)).map(el => el.id)
+    const artistIdList = (await this.getAllArtists(playlistId)).map(el => el.id)
     const getter = this.spotifyApi.getArtists.bind(this.spotifyApi)
     const tasks = _.chunk(artistIdList, 50).map(el => getter(el))
     const dataArr = await Promise.all(tasks)
