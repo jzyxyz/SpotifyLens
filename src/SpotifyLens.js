@@ -34,9 +34,12 @@ class SpotifyLens {
   concatWrapper(getter) {
     return async function(id) {
       const limit = DEFAULT_LIMIT
-      const {
-        body: { total },
-      } = await getter({ offset: 0, limit })
+      let total
+      if (id) {
+        total = (await getter(id, { offset: 0, limit })).body.total
+      } else {
+        total = (await getter({ offset: 0, limit })).body.total
+      }
       console.log(info(`Total: ${total} objects found`))
       const batch = Math.ceil(total / limit)
       return _.range(0, batch).map(async i =>
