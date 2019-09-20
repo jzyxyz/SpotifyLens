@@ -6,9 +6,8 @@ const info = chalk.blue
 const error = chalk.red
 
 class SpotifyLens {
-  constructor(spotifyApi, options) {
+  constructor(spotifyApi) {
     this.spotifyApi = spotifyApi
-    this.options = options
   }
 
   async getAllTracks(playlistId) {
@@ -176,6 +175,39 @@ class SpotifyLens {
     )
     console.log(info(`Total: ${ordered.length} genre tokens found`))
     return ordered
+  }
+
+  async analyzeAudioFeatures(playlistId) {
+    const trackIdArr = _.flatten(await this.getAllTracks(playlistId)).map(
+      el => el.track.id,
+    )
+    const chunks = _.chunk(trackIdArr, 50)
+    const data = await Promise.all(
+      chunks.map(ch => this.spotifyApi.getAudioFeaturesForTracks(ch)),
+    )
+    const audioFeatures = _.flatMap(data, d => d.body.audio_features)
+    // console.log(JSON.stringify(audioFeatures))
+    const FEATURE_KEYS = [
+      'danceability',
+      'energy',
+      'key',
+      'loudness',
+      'mode',
+      'speechiness',
+      'acousticness',
+      'instrumentalness',
+      'liveness',
+      'valence',
+      'tempo',
+    ]
+    const average = audioFeatures.reduce((acc, cur) => {
+      const obj = {}
+      FEATURE_KEYS.forEach(key => {
+        obj[key] = (acc[key] + cur[key]) / 2
+      })
+      return obj
+    })
+    return average
   }
 }
 

@@ -19,6 +19,7 @@ class Worker {
       clientSecret: process.env.ClientSecret,
       redirectUri: REDIRECT_URL,
     })
+
     this.app = express()
     this.app.use(cors()).use(cookieParser())
     // necessary
@@ -164,6 +165,13 @@ class Worker {
             JSON.stringify(genreTokenizedList),
           )
           break
+        case 9:
+          const audioFeatures = await this.lens.analyzeAudioFeatures()
+          await writeToFile(
+            path.join(this.outputDir, process.env.AudioFeatures),
+            `default_tracks_audio_features.json`,
+            JSON.stringify(audioFeatures),
+          )
         default:
           loop = false
       }

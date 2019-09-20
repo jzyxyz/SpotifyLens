@@ -28,6 +28,7 @@ const PROMPT = {
     '  Export top 50 tracks',
     '  Export genre data',
     '  Export genre data (tokenized)',
+    '  Export audio features',
     '--',
     '  Exit',
   ].map((el, idx) => {
