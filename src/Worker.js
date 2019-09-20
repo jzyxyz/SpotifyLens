@@ -109,19 +109,12 @@ class Worker {
           }
           break
         case 2:
-          // const playlistId = '4ADFwns89Zo5O3ea13wFG3'
-          const playlistId = undefined
-          const pagedTracks = await this.lens.getAllTracks()
-          const tasks = pagedTracks.map(async (el, idx) => {
-            const filename = playlistId =>
-              `${playlistId ? playlistId.slice(0, 7) : 'tracks'}_${idx}.json`
-            await writeToFile(
-              path.join(this.outputDir, process.env.Tracks),
-              filename(playlistId),
-              JSON.stringify(el),
-            )
-          })
-          await Promise.all(tasks)
+          const allTracks = await this.lens.getAllTracks()
+          await writeToFile(
+            path.join(this.outputDir, process.env.Tracks),
+            `default_all_saved_tracks.json`,
+            JSON.stringify(allTracks),
+          )
           break
         case 3:
           const allArtistsList = await this.lens.getAllArtists()
@@ -133,6 +126,11 @@ class Worker {
           break
         case 4:
           const playLists = await this.lens.showPlaylists()
+          await writeToFile(
+            path.join(this.outputDir, process.env.Playlists),
+            `user_playlists.json`,
+            JSON.stringify(playLists),
+          )
           playLists.forEach(pl => {
             console.log(pl)
           })
