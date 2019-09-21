@@ -9,6 +9,7 @@ const open = require('open')
 const { SPOTIFY_SCOPES: scopes, PROMPT: prompt } = require('../config')
 const path = require('path')
 const chalk = require('chalk')
+const _ = require('lodash')
 
 class Worker {
   constructor() {
@@ -176,44 +177,66 @@ class Worker {
           )
           break
         case 10:
-          // maybe to many api calls to do it aysncly
-          // Spotify dosenot seem to like that.
-          // so do it synchronouly
           const getGenre = async id => await this.lens.analyzeGenre(id)
           const getArtist = async id => await this.lens.getAllArtists(id)
           const getFeature = async id =>
             await this.lens.analyzeAudioFeatures(id)
-          async function* dataGen() {
-            const countryList = require('../country_list')
-            for (let i = 0; i < countryList.length; i++) {
-              const el = countryList[i]
-              yield {
-                idx: i,
-                id: el.id,
-                name: el.name,
-                genres: (await getGenre(el.id)).filter(d => d.count > 3),
-                artists: (await getArtist(el.id)).filter(d => d.count > 1),
-                features: await getFeature(el.id),
+          const countryList = require('../country_list')
+          const failed = {}
+          async function* dataGen(indexArray) {
+            for (let i = 0; i < indexArray.length; i++) {
+              const cur = indexArray[i]
+              const el = countryList[cur]
+              try {
+                const [genres, artists, features] = await Promise.all([
+                  getGenre(el.id),
+                  getArtist(el.id),
+                  getFeature(el.id),
+                ])
+                yield {
+                  idx: cur,
+                  ...el,
+                  genres: genres.filter(d => d.count > 6),
+                  artists: artists.filter(d => d.count > 1),
+                  features,
+                }
+              } catch (error) {
+                failed[cur] = true
+                yield {
+                  idx: cur,
+                  failed: true,
+                }
+                console.log('bad', cur, el.name)
               }
             }
           }
-          const gen = dataGen()
-          let data = await gen.next()
-          while (data.done === false) {
-            await writeToFile(
-              path.join(this.outputDir, 'country'),
-              `${data.value.name}.json`,
-              JSON.stringify(data.value),
-            )
-            try {
-              data = await gen.next()
-            } catch (error) {
-              console.log(
-                `error fetching ${data.value.name} at ${data.value.idx}`,
-              )
+          const loop = generator => async indexArray => {
+            const gen = generator(indexArray)
+            let data = await gen.next()
+            while (data.done === false) {
+              if (data.value.failed === true) {
+                console.log('Still failing', Object.keys(failed))
+              } else {
+                console.log('ok', data.value.idx)
+                // use aync write can improve performance
+                await writeToFile(
+                  path.join(this.outputDir, 'country'),
+                  `${data.value.name}.json`,
+                  JSON.stringify(data.value),
+                )
+                if (failed[data.value.idx]) {
+                  delete failed[data.value.idx]
+                }
+              }
               data = await gen.next()
             }
           }
+          await loop(dataGen)(_.range(countryList.length))
+
+          while (Object.keys(failed).length) {
+            await loop(dataGen)(Object.keys(failed))
+          }
+          console.log(failed)
           break
         default:
           loop = false
