@@ -5,7 +5,7 @@ So far the core functions I designed have all been implemented.
 The last function I added is to export top data for different countries. And I have also initiated a sister project [`Spotioid`](https://github.com/jzyxyz/Spotioid) to visualize these data, check it out if you are interested.   
 
 Issues may occure if the playlist is extremely large due to API call frequency restrictions by Spofity (over 1.5k, as I am doing concurrent requests, and in that case it will be too many). I will fix this problem later(but not recently). But you can checkout the code in `Worker case 10` where there is a solution for a similar problem.
-If you found out any other bugs, please report on [Github](https://github.com/jzyxyz/Spotioid). PR is all welcomed. 
+If you found out any other bugs, please report on [Github](https://github.com/jzyxyz/SpotifyLens). PR is all welcomed. 
 
 
 This is a **enhanced** wrapper for Spotify-api. It provides a simple api to the data that otherwise have to be computed.
