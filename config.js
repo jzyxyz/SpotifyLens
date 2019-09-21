@@ -29,6 +29,7 @@ const PROMPT = {
     '  Export genre data',
     '  Export genre data (tokenized)',
     '  Export audio features',
+    '  Export top data for different countries',
     '--',
     '  Exit',
   ].map((el, idx) => {
