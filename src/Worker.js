@@ -90,13 +90,12 @@ class Worker {
         errorHandler(error)('Failed to refresh access token')
       }
     }, 3000000)
-    // const id = `37i9dQZEVXbLoATJ81JYXz`
     const id = undefined
 
     let loop = true
     while (loop) {
       const op = await readInput()
-      let choice = /(?<=#)\d{1}/.exec(op)[0]
+      let choice = /(?<=#)\d+/.exec(op)[0]
       choice = parseInt(choice)
       switch (choice) {
         case 0:
@@ -175,6 +174,46 @@ class Worker {
             `default_tracks_audio_features_${id ? id.slice(0, 6) : ''}.json`,
             JSON.stringify(audioFeatures),
           )
+          break
+        case 10:
+          // maybe to many api calls to do it aysncly
+          // Spotify dosenot seem to like that.
+          // so do it synchronouly
+          const getGenre = async id => await this.lens.analyzeGenre(id)
+          const getArtist = async id => await this.lens.getAllArtists(id)
+          const getFeature = async id =>
+            await this.lens.analyzeAudioFeatures(id)
+          async function* dataGen() {
+            const countryList = require('../country_list')
+            for (let i = 0; i < countryList.length; i++) {
+              const el = countryList[i]
+              yield {
+                idx: i,
+                id: el.id,
+                name: el.name,
+                genres: (await getGenre(el.id)).filter(d => d.count > 3),
+                artists: (await getArtist(el.id)).filter(d => d.count > 1),
+                features: await getFeature(el.id),
+              }
+            }
+          }
+          const gen = dataGen()
+          let data = await gen.next()
+          while (data.done === false) {
+            await writeToFile(
+              path.join(this.outputDir, 'country'),
+              `${data.value.name}.json`,
+              JSON.stringify(data.value),
+            )
+            try {
+              data = await gen.next()
+            } catch (error) {
+              console.log(
+                `error fetching ${data.value.name} at ${data.value.idx}`,
+              )
+              data = await gen.next()
+            }
+          }
           break
         default:
           loop = false
