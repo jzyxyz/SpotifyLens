@@ -2,12 +2,13 @@
 
 ##### NB
 So far the core functions I designed have all been implemented. 
-If you are interested, I added a function to export top data for different countries and initiated a sister project [`Spotioid`](https://github.com/jzyxyz/Spotioid) to visualize these data.      
-Issues may occure if the playlist is extremely large (over 1.5k, as I am doing concurrent requests, and in that case it will be too many) due to API call frequency restrictions by Spofity. I will fix this problem later(but not recently). But you can checkout the code in `Worker case 10` where is a solution for a similar problem.
+The last function I added is to export top data for different countries. And I have also initiated a sister project [`Spotioid`](https://github.com/jzyxyz/Spotioid) to visualize these data, check it out if you are interested.   
+
+Issues may occure if the playlist is extremely large due to API call frequency restrictions by Spofity (over 1.5k, as I am doing concurrent requests, and in that case it will be too many). I will fix this problem later(but not recently). But you can checkout the code in `Worker case 10` where there is a solution for a similar problem.
 If you found out any other bugs, please report on [Github](https://github.com/jzyxyz/Spotioid). PR is all welcomed. 
 
 
-This is a **enhanced** wrapper for Spotify-api. It provides a simple api to the data otherwise have to be computed.
+This is a **enhanced** wrapper for Spotify-api. It provides a simple api to the data that otherwise have to be computed.
 
 Along with the package also comes a interactive terminal interface with which these data can be exported to local `.json` file. In addition, some handy playback controls are integrated.
 
@@ -16,7 +17,7 @@ Along with the package also comes a interactive terminal interface with which th
 - **Interactive REPL** terminal interface for controling over spotify and export data.
 ![screenshot](terminal_screenshot.jpg)
 - **Automatically** refreshes access token in the interactive mode. 
-- Get **contactnated** & **pruned** (configurable) data of **all** (Say goodbye to 50 objects at a time!) tracks in **ANY** playlists. Concurrent requests garantees the execution is still fast even when the playlist is long .
+- Get **contatenated** & **pruned** (configurable) data of **all** (Say goodbye to 50 objects at a time!) tracks in **ANY** playlists. Concurrent requests garantees the execution is still fast even when the playlist is long .
 - Get a list of **ranked** artists from **ANY** playlist. 
 - Genre analyzation for **ANY** playlist.
 - **Playlist-oriented** audio features analysis.
