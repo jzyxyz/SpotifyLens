@@ -69,7 +69,7 @@ const PRUNE_TRACK_KEYS = [
   'is_local',
 ]
 
-const PRUNE_ARTIST_KEYS = ['external_urls', 'followers', 'popularity', 'images']
+const PRUNE_ARTIST_KEYS = ['external_urls', 'followers', 'popularity']
 
 module.exports = {
   SPOTIFY_SCOPES,

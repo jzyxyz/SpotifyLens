@@ -182,7 +182,8 @@ class Worker {
           const getFeature = async id =>
             await this.lens.analyzeAudioFeatures(id)
           const countryList = require('../country_list')
-          const failed = {}
+          const failed = new Set()
+
           async function* dataGen(indexArray) {
             for (let i = 0; i < indexArray.length; i++) {
               const cur = indexArray[i]
@@ -201,42 +202,36 @@ class Worker {
                   features,
                 }
               } catch (error) {
-                failed[cur] = true
+                // failed[cur] = true
+                failed.add(cur)
                 yield {
                   idx: cur,
                   failed: true,
                 }
-                console.log('bad', cur, el.name)
               }
             }
           }
+
           const loop = generator => async indexArray => {
-            const gen = generator(indexArray)
-            let data = await gen.next()
-            while (data.done === false) {
-              if (data.value.failed === true) {
-                console.log('Still failing', Object.keys(failed))
+            for await (let data of generator(indexArray)) {
+              if (data.failed === true) {
+                console.log('Still failing', data.idx)
               } else {
-                console.log('ok', data.value.idx)
-                // use aync write can improve performance
-                await writeToFile(
+                console.log('ok', data.idx)
+                writeToFile(
                   path.join(this.outputDir, 'country'),
-                  `${data.value.name}.json`,
-                  JSON.stringify(data.value),
-                )
-                if (failed[data.value.idx]) {
-                  delete failed[data.value.idx]
-                }
+                  `${data.name}.json`,
+                  JSON.stringify(data),
+                ).then(failed.delete(data.idx))
               }
-              data = await gen.next()
             }
           }
+
           await loop(dataGen)(_.range(countryList.length))
 
-          while (Object.keys(failed).length) {
-            await loop(dataGen)(Object.keys(failed))
+          while (failed.size) {
+            await loop(dataGen)(Array.from(failed))
           }
-          console.log(failed)
           break
         default:
           loop = false

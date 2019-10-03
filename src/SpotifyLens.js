@@ -127,7 +127,7 @@ class SpotifyLens {
       const responses = await Promise.all(requests)
       const items = responses.map(r => r.body.items)
       if (pruneFn) {
-        items.forEach(arr => arr.forEach(pruneTrack))
+        items.forEach(arr => arr.forEach(pruneFn))
       }
       return _.zipObject(TIME_RANGES, items)
     }
@@ -199,7 +199,11 @@ class SpotifyLens {
       })
       return obj
     })
-    return average
+
+    return _.toPairs(average).map(el => ({
+      name: el[0],
+      value: el[1],
+    }))
   }
 }
 
