@@ -1,8 +1,7 @@
-const SpotifyWebApi = require('spotify-web-api-node')
 const cors = require('cors')
 const express = require('express')
 const cookieParser = require('cookie-parser')
-const SpotifyLens = require('./SpotifyLens')
+const SpotifyLens = require('./Lens')
 const { errorHandler, writeToFile } = require('./utils')
 const inquirer = require('inquirer')
 const open = require('open')
@@ -15,7 +14,7 @@ class Worker {
   constructor() {
     this.loadEnv()
     const REDIRECT_URL = `http://localhost:${process.env.Port}/callback/`
-    this.spotifyApi = new SpotifyWebApi({
+    this.lens = new SpotifyLens({
       clientId: process.env.ClientID,
       clientSecret: process.env.ClientSecret,
       redirectUri: REDIRECT_URL,
@@ -24,12 +23,8 @@ class Worker {
     this.app.use(cors()).use(cookieParser())
     // necessary
     this.authDoneCallback = this.authDoneCallback.bind(this)
-    this.spotifyApi.refreshAccessToken = this.spotifyApi.refreshAccessToken.bind(
-      this.spotifyApi,
-    )
-    this.spotifyApi.setAccessToken = this.spotifyApi.setAccessToken.bind(
-      this.spotifyApi,
-    )
+    this.lens.refreshAccessToken = this.lens.refreshAccessToken.bind(this.lens)
+    this.lens.setAccessToken = this.lens.setAccessToken.bind(this.lens)
     this.authServerHook(this.authDoneCallback)
     this.outputDir = path.join(process.cwd(), process.env.OutputDir)
   }
@@ -48,9 +43,9 @@ class Worker {
       const code = req.query.code || null
       let data = null
       try {
-        data = await this.spotifyApi.authorizationCodeGrant(code)
-        this.spotifyApi.setAccessToken(data.body['access_token'])
-        this.spotifyApi.setRefreshToken(data.body['refresh_token'])
+        data = await this.lens.authorizationCodeGrant(code)
+        this.lens.setAccessToken(data.body['access_token'])
+        this.lens.setRefreshToken(data.body['refresh_token'])
         callback()
       } catch (error) {
         res.status(500).json({
@@ -68,14 +63,13 @@ class Worker {
     this.server = this.app.listen(process.env.Port)
     // console.log(`Getting access token on port ${process.env.Port}`)
     const state = 'ThisIsNotRandomAtAll'
-    const authUrl = this.spotifyApi.createAuthorizeURL(scopes, state)
+    const authUrl = this.lens.createAuthorizeURL(scopes, state)
     // console.log(authUrl)
     await open(authUrl)
   }
 
   async authDoneCallback() {
     this.server.close()
-    this.lens = new SpotifyLens(this.spotifyApi)
     const readInput = async () => {
       const { operations: op } = await inquirer.prompt([prompt])
       return op
@@ -85,12 +79,14 @@ class Worker {
       try {
         const {
           body: { access_token },
-        } = await this.spotifyApi.refreshAccessToken()
-        this.spotifyApi.setAccessToken(access_token)
+        } = await this.lens.refreshAccessToken()
+        this.lens.setAccessToken(access_token)
       } catch (error) {
         errorHandler(error)('Failed to refresh access token')
       }
     }, 3000000)
+
+    // test playlist id
     const id = undefined
 
     let loop = true
@@ -104,7 +100,7 @@ class Worker {
           break
         case 1:
           try {
-            await this.spotifyApi.skipToNext()
+            await this.lens.skipToNext()
           } catch (error) {
             errorHandler(error)('Failed to skip to the next one')
           }
@@ -126,15 +122,16 @@ class Worker {
           )
           break
         case 4:
-          const playLists = await this.lens.showPlaylists()
+          const playLists = await this.lens.getAllPlaylists()
+          playLists.forEach(el => {
+            el = _.pick(el, ['name', 'id'])
+            console.log(el)
+          })
           await writeToFile(
             path.join(this.outputDir, process.env.Playlists),
             `user_playlists.json`,
             JSON.stringify(playLists),
           )
-          playLists.forEach(pl => {
-            console.log(pl)
-          })
           break
         case 5:
           const topArtistsList = await this.lens.getTopArtists()
@@ -162,6 +159,7 @@ class Worker {
           break
         case 8:
           const genreTokenizedList = await this.lens.analyzeGenreTokenized(id)
+          console.log(`Total: ${genreTokenizedList.length} genre tokens found`)
           await writeToFile(
             path.join(this.outputDir, process.env.Genres),
             `top_genres_tokenized_${id ? id.slice(0, 6) : ''}.json`,
@@ -202,7 +200,6 @@ class Worker {
                   features,
                 }
               } catch (error) {
-                // failed[cur] = true
                 failed.add(cur)
                 yield {
                   idx: cur,
@@ -222,7 +219,11 @@ class Worker {
                   path.join(this.outputDir, 'country'),
                   `${data.name}.json`,
                   JSON.stringify(data),
-                ).then(failed.delete(data.idx))
+                ).then(() => {
+                  if (failed.has(data.idx)) {
+                    failed.delete(data.idx)
+                  }
+                })
               }
             }
           }
