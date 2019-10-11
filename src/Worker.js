@@ -209,7 +209,7 @@ class Worker {
             }
           }
 
-          const loop = generator => async indexArray => {
+          const loopApi = generator => async indexArray => {
             for await (let data of generator(indexArray)) {
               if (data.failed === true) {
                 console.log('Still failing', data.idx)
@@ -228,10 +228,10 @@ class Worker {
             }
           }
 
-          await loop(dataGen)(_.range(countryList.length))
+          await loopApi(dataGen)(_.range(countryList.length))
 
           while (failed.size) {
-            await loop(dataGen)(Array.from(failed))
+            await loopApi(dataGen)(Array.from(failed))
           }
           break
         default:
