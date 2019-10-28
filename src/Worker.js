@@ -2,6 +2,8 @@ const cors = require('cors')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const SpotifyLens = require('./Lens')
+
+// const SpotifyLens = require('./lens.new')
 const { errorHandler, writeToFile } = require('./utils')
 const inquirer = require('inquirer')
 const open = require('open')
@@ -10,7 +12,7 @@ const path = require('path')
 const chalk = require('chalk')
 const _ = require('lodash')
 
-class Worker {
+module.exports = class {
   constructor() {
     this.loadEnv()
     const REDIRECT_URL = `http://localhost:${process.env.Port}/callback/`
@@ -195,7 +197,7 @@ class Worker {
                 yield {
                   idx: cur,
                   ...el,
-                  genres: genres.filter(d => d.count > 6),
+                  genres: genres.filter(d => d.count > 5),
                   artists: artists.filter(d => d.count > 1),
                   features,
                 }
@@ -243,5 +245,3 @@ class Worker {
     process.exit(0)
   }
 }
-
-module.exports = Worker

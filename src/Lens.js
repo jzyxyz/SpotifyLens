@@ -42,7 +42,7 @@ module.exports = class extends SpotifyWebApi {
       console.log(
         info(`Total: ${total} objects found, getting in ${batch} batches`),
       )
-      return _.range(0, batch).map(async i =>
+      return _.range(0, batch).map(i =>
         id
           ? getter(id, {
               offset: i * limit,
