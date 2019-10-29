@@ -3,72 +3,24 @@ const _ = require('lodash')
 const R = require('ramda')
 const chalk = require('chalk')
 const batchSize = 50
+const constants = require('./constants.json')
+const { features } = constants
+
+const { countBy_ThenOrder, nameKV, averageReduceByKey } = require('./funtions')
 
 const info = (...msg) => console.info(chalk.blue(...msg))
-const infoLength = prefix => list => {
-  info(prefix, list.length)
-  return list
-}
-
 const tasksTo = key => async tasks => {
   const responses = _.isArray(tasks)
     ? await Promise.all(tasks)
     : await Promise.all([tasks])
   return _.flatMap(responses, el => el.body[key])
 }
-const features = [
-  'danceability',
-  'energy',
-  'key',
-  'loudness',
-  'mode',
-  'speechiness',
-  'acousticness',
-  'instrumentalness',
-  'liveness',
-  'valence',
-  'tempo',
-]
 
 const taskToItem = tasksTo('item')
 const tasksToItems = tasksTo('items')
 const tasksToArtists = tasksTo('artists')
 const tasksToAudioFeatures = tasksTo('audio_features')
-const identity = el => el
 const artistsFromTracks = list => _.flatMap(list, el => el.track.artists)
-const headWithCount = list => {
-  const head = list[0]
-  return {
-    // ...head,
-    head,
-    count: list.length,
-  }
-}
-const countGroupBy = iteratee => list => {
-  const copy = list.map(identity)
-  return _.chain(copy)
-    .groupBy(iteratee)
-    .values()
-    .map(headWithCount)
-    .value()
-}
-const countGroupById = countGroupBy(el => el.id)
-const orderByCountAndName = list =>
-  _.orderBy(list, ['count', 'name'], ['desc', 'asc'])
-
-const countByIdThenOrder = R.pipe(
-  countGroupById,
-  orderByCountAndName,
-  infoLength('********** Target Length: '),
-)
-
-const averageReduceByKey = keys => (acc, cur) => {
-  const obj = {}
-  keys.forEach(key => {
-    obj[key] = (acc[key] + cur[key]) / 2
-  })
-  return obj
-}
 
 module.exports = class extends SpotifyWebApi {
   constructor(credentials) {
@@ -76,6 +28,7 @@ module.exports = class extends SpotifyWebApi {
     this.getAccessToken = this.getAccessToken.bind(this)
     this.refreshAccessToken = this.refreshAccessToken.bind(this)
     this.setAccessToken = this.setAccessToken.bind(this)
+    this.createAuthorizeURL = this.createAuthorizeURL.bind(this)
   }
 
   concatWrapper(getter) {
@@ -108,7 +61,7 @@ module.exports = class extends SpotifyWebApi {
   async rankArtists(playlistId) {
     const tracks = await this.allTracks(playlistId)
     const artistsList = artistsFromTracks(tracks)
-    return countByIdThenOrder(artistsList)
+    return countBy_ThenOrder('id')(artistsList)
   }
 
   async likeCurrentPlaying() {
@@ -127,7 +80,7 @@ module.exports = class extends SpotifyWebApi {
     return tasksToArtists(tasks)
   }
 
-  rankGenresOffline(artistsObjectList, options) {
+  rankGenresSync(artistsObjectList, options) {
     const tokenize = _.get(options, 'tokenize', false)
     let genres = _.flatMapDeep(artistsObjectList, el => el.genres)
     if (tokenize === true) {
@@ -135,37 +88,56 @@ module.exports = class extends SpotifyWebApi {
     }
     return R.pipe(
       R.map(el => ({
-        id: el,
+        name: el,
       })),
-      countByIdThenOrder,
+      countBy_ThenOrder('name'),
     )(genres)
   }
 
   async rankGenres(playlistId, options) {
     const artists = await this.allArtistsFullObject(playlistId)
-    return this.rankGenresOffline(artists, options)
+    return this.rankGenresSync(artists, options)
   }
 
   async audioFeatures(playlistId) {
     const trackIdList = (await this.allTracks(playlistId)).map(
       el => el.track.id,
     )
+    return this.audioFeaturesFromTrackIdList(trackIdList)
+  }
+
+  async audioFeaturesFromTrackIdList(trackIdList) {
     const tasks = _.chunk(trackIdList, batchSize).map(el =>
       this.getAudioFeaturesForTracks.bind(this)(el),
     )
     const af = await tasksToAudioFeatures(tasks)
-    info(features)
-    return af.reduce(averageReduceByKey(features))
+    const trusy = af.filter(el => el !== null)
+    info(`af is available for ${trusy.length} of 50 in the list`)
+    return trusy.reduce(averageReduceByKey(features))
+  }
+
+  async calcAll(playlistId) {
+    const tracks = await this.allTracks(playlistId)
+    const artists = countBy_ThenOrder('id')(artistsFromTracks(tracks))
+    const artistIdList = artists.map(el => el.id)
+    const tasks = _.chunk(artistIdList, batchSize).map(el =>
+      this.getArtists.bind(this)(el),
+    )
+    const fullArtistsObjList = await tasksToArtists(tasks)
+    const genres = this.rankGenresSync(fullArtistsObjList)
+    const trackIdList = tracks.map(el => el.track.id)
+    const features = await this.audioFeaturesFromTrackIdList(trackIdList)
+    return {
+      genres,
+      artists,
+      features: nameKV(features),
+    }
   }
 
   async refreshToken() {
-    try {
-      const {
-        body: { access_token },
-      } = await this.refreshAccessToken()
-      this.setAccessToken(access_token)
-    } catch (e) {
-      throw Error(e)
-    }
+    const {
+      body: { access_token },
+    } = await this.refreshAccessToken()
+    this.setAccessToken(access_token)
   }
 }
