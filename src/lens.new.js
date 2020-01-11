@@ -6,7 +6,7 @@ const batchSize = 50
 const constants = require('./constants.json')
 const { features } = constants
 
-const { countBy_ThenOrder, nameKV, averageReduceByKey } = require('./funtions')
+const { countBy_ThenOrder, nameKV, averageReduceByKey } = require('./functions')
 
 const info = (...msg) => console.info(chalk.blue(...msg))
 const tasksTo = key => async tasks => {
